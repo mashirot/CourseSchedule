@@ -1,12 +1,20 @@
 package ski.mashiro.dao;
 
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import ski.mashiro.pojo.Course;
+
+import java.util.List;
+
 /**
 * @author MashiroT
-* @description 针对表【courses】的数据库操作Mapper
-* @createDate 2022-09-30 14:55:19
-* @Entity generator.ski.mashiro.pojo.Course
 */
+@Mapper
 public interface CourseDao {
-
-
+    int saveCourse(@Param("course") Course course);
+    int deleteByCourseName(@Param("courseName") String courseName);
+    int updateCourse(@Param("course") Course course);
+    Course getCourseByCourseName(@Param("courseName") String courseName);
+    List<Course> listAllByCourseDateCourses(@Param("courseDate") String courseDate);
+    List<Course> listAllCourses();
 }

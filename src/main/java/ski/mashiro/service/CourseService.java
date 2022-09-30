@@ -1,13 +1,51 @@
 package ski.mashiro.service;
 
-import generator.ski.mashiro.pojo.Course;
-import com.baomidou.mybatisplus.service.IService;
+import ski.mashiro.pojo.Course;
+
+import java.util.List;
 
 /**
 * @author MashiroT
-* @description 针对表【courses】的数据库操作Service
-* @createDate 2022-09-30 14:55:19
 */
-public interface CourseService extends IService<Course> {
+public interface CourseService {
+    /**
+     * 添加课程
+     * @param course 课程对象
+     * @return 结果
+     */
+    boolean saveCourse(Course course);
 
+    /**
+     * 删除课程
+     * @param courseName 课程名
+     * @return 结果
+     */
+    boolean deleteByCourseName(String courseName);
+
+    /**
+     * 修改课程信息
+     * @param course 新课程对象
+     * @return 结果
+     */
+    boolean updateCourse(Course course);
+
+    /**
+     * 通过课程名获取课程
+     * @param courseName 课程名
+     * @return 返回课程对象
+     */
+    Course getCourseByCourseName(String courseName);
+
+    /**
+     * 获取同一天的课程
+     * @param courseDate 日期
+     * @return 结果集合
+     */
+    List<Course> listAllByCourseDateCourses(String courseDate);
+
+    /**
+     * 获取所有课程
+     * @return 结果集合
+     */
+    List<Course> listAllCourses();
 }
