@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="project@sh-cynosdbmysql-grp-eauf5d9w.sql.tencentcdb.com" uuid="9abebfa4-1771-442e-a273-90c65ebab6ba">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://sh-cynosdbmysql-grp-eauf5d9w.sql.tencentcdb.com:20694/project?useSSL=true&amp;useServerPrepStmts=true&amp;autoReconnect=true&amp;useUnicode=true</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>

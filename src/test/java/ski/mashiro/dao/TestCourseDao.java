@@ -1,24 +1,32 @@
 package ski.mashiro.dao;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ski.mashiro.pojo.Course;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootTest
 public class TestCourseDao {
 
     @Autowired
     private CourseDao courseDao;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void testSaveCourse() {
+    void testSaveCourse() throws Exception {
         Course course = new Course();
         course.setCourseName("测试");
         course.setCourseLocation("提篮桥");
         course.setCourseLecturer("陈良宇");
-        course.setCourseDate("Sunday");
-        course.setCourseTime("10:00-11:30");
+        Map<String, String> map = new HashMap<>();
+        map.put("Sunday", "10:00-11:30");
+        map.put("Monday", "14:00-15:30");
+        course.setCourseNormalDate(map);
+        course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
         System.out.println((courseDao.saveCourse(course) != 0));
     }
 

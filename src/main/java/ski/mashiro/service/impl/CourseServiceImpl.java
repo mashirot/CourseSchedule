@@ -1,9 +1,17 @@
 package ski.mashiro.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapType;
+import org.springframework.beans.factory.annotation.Autowired;
+import ski.mashiro.dao.CourseDao;
+import ski.mashiro.pojo.Code;
 import ski.mashiro.pojo.Course;
+import ski.mashiro.pojo.Result;
 import ski.mashiro.service.CourseService;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -13,33 +21,69 @@ import java.util.List;
 @Service
 public class CourseServiceImpl implements CourseService {
 
-    @Override
-    public boolean saveCourse(Course course) {
-        return false;
+    private final CourseDao courseDao;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final MapType mapType = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, String.class);
+
+    @Autowired
+    public CourseServiceImpl(CourseDao courseDao) {
+        this.courseDao = courseDao;
     }
 
     @Override
-    public boolean deleteByCourseName(String courseName) {
-        return false;
+    public Result saveCourse(Course course) {
+        try {
+            course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
+        } catch (JsonProcessingException e) {
+            return new Result(Code.SAVE_FAILED, null);
+        }
+        return new Result(courseDao.saveCourse(course) != 0 ? Code.SAVE_SUCCESS : Code.SAVE_FAILED, null);
     }
 
     @Override
-    public boolean updateCourse(Course course) {
-        return false;
+    public Result deleteByCourseName(String courseName) {
+        return new Result(courseDao.deleteByCourseName(courseName) != 0 ? Code.DELETE_SUCCESS : Code.DELETE_FAILED, null);
     }
 
     @Override
-    public Course getCourseByCourseName(String courseName) {
-        return null;
+    public Result updateCourse(Course course) {
+        return new Result(courseDao.updateCourse(course) != 0 ? Code.UPDATE_SUCCESS : Code.UPDATE_FAILED, null);
     }
 
     @Override
-    public List<Course> listAllByCourseDateCourses(String courseDate) {
-        return null;
+    public Result getCourseByCourseName(String courseName) {
+        Course course = courseDao.getCourseByCourseName(courseName);
+        try {
+            course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
+        } catch (JsonProcessingException e) {
+            return new Result(Code.GET_SINGLE_FAILED, null);
+        }
+        return new Result(Code.GET_SINGLE_SUCCESS, course);
     }
 
     @Override
-    public List<Course> listAllCourses() {
-        return null;
+    public Result listAllByCourseDateCourses(String courseDate) {
+        List<Course> list = courseDao.listAllByCourseDateCourses(courseDate);
+        for (Course course : list) {
+            try {
+                course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
+            } catch (JsonProcessingException e) {
+                return new Result(Code.LIST_DATE_FAILED, null);
+            }
+        }
+        return new Result(Code.LIST_DATE_SUCCESS, list);
+    }
+
+    @Override
+    public Result listAllCourses() {
+        List<Course> list = courseDao.listAllCourses();
+        for (Course course : list) {
+            try {
+                course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
+            } catch (JsonProcessingException e) {
+                return new Result(Code.LIST_ALL_FAILED, list);
+            }
+        }
+        return new Result(Code.LIST_ALL_SUCCESS, list);
     }
 }

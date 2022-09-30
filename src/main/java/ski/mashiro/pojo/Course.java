@@ -2,8 +2,11 @@ package ski.mashiro.pojo;
 
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * @author MashiroT
+ * 2022-09-30 14:52:11
  */
 @Data
 public class Course {
@@ -11,5 +14,5 @@ public class Course {
     private String courseLocation;
     private String courseLecturer;
     private String courseDate;
-    private String courseTime;
+    private Map<String, String> courseNormalDate;
 }

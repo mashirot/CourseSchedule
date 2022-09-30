@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://sh-cynosdbmysql-grp-eauf5d9w.sql.tencentcdb.com:20694/project?useSSL=true&useServerPrepStmts=true&autoReconnect=true&useUnicode=true
+    username: root
+    password: ItcvRpV@l0
+logging:
+  level:
+    root: warn
