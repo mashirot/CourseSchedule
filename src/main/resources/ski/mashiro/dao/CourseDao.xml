@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ski.mashiro.dao.CourseDao">
+
+    <resultMap id="BaseResultMap" type="ski.mashiro.pojo.Course">
+            <result property="courseName" column="course_name" jdbcType="VARCHAR"/>
+            <result property="courseLocation" column="course_location" jdbcType="VARCHAR"/>
+            <result property="courseLecturer" column="course_lecturer" jdbcType="VARCHAR"/>
+            <result property="courseDate" column="course_date" jdbcType="OTHER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        course_name,course_location,course_lecturer,
+        course_date
+    </sql>
+</mapper>
