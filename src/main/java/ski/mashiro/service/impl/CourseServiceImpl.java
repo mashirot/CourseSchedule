@@ -11,8 +11,10 @@ import ski.mashiro.pojo.Result;
 import ski.mashiro.service.CourseService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author MashiroT
@@ -64,14 +66,21 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Result listAllByCourseDateCourses(String courseDate) {
         List<Course> list = courseDao.listAllByCourseDateCourses(courseDate);
+        List<Course> courseList = new ArrayList<>(list.size());
         for (Course course : list) {
             try {
-                course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
+                Map<String, String> currentDate = objectMapper.readValue(course.getCourseDate(), mapType);
+                for (Map.Entry<String, String> entry : currentDate.entrySet()) {
+                    if (!courseDate.equals(entry.getKey())) {
+                        currentDate.remove(entry.getKey(), entry.getValue());
+                    }
+                }
+                courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), currentDate));
             } catch (JsonProcessingException e) {
                 return new Result(Code.LIST_DATE_FAILED, null);
             }
         }
-        return new Result(Code.LIST_DATE_SUCCESS, list);
+        return new Result(Code.LIST_DATE_SUCCESS, courseList);
     }
 
     @Override
@@ -81,7 +90,7 @@ public class CourseServiceImpl implements CourseService {
             try {
                 course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
             } catch (JsonProcessingException e) {
-                return new Result(Code.LIST_ALL_FAILED, list);
+                return new Result(Code.LIST_ALL_FAILED, null);
             }
         }
         return new Result(Code.LIST_ALL_SUCCESS, list);
