@@ -7,4 +7,4 @@ spring:
     password: ItcvRpV@l0
 logging:
   level:
-    root: warn
+    root: info
