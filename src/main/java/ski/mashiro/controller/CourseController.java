@@ -18,15 +18,15 @@ public class CourseController {
         this.courseService = courseService;
     }
     @PostMapping
-    public Result saveCourse(Course course) {
+    public Result saveCourse(@RequestBody Course course) {
         return courseService.saveCourse(course);
     }
-    @DeleteMapping
-    public Result deleteCourse(String courseName) {
+    @DeleteMapping("/{courseName}")
+    public Result deleteCourse(@PathVariable String courseName) {
         return courseService.deleteByCourseName(courseName);
     }
     @PutMapping
-    public Result updateCourse(Course course) {
+    public Result updateCourse(@RequestBody Course course) {
         return courseService.updateCourse(course);
     }
     @GetMapping("/courseName/{courseName}")

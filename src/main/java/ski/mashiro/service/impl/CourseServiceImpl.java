@@ -49,6 +49,11 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Result updateCourse(Course course) {
+        try {
+            course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
+        } catch (JsonProcessingException e) {
+            return new Result(Code.UPDATE_FAILED, null);
+        }
         return new Result(courseDao.updateCourse(course) != 0 ? Code.UPDATE_SUCCESS : Code.UPDATE_FAILED, null);
     }
 
