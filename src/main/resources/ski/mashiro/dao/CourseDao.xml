@@ -12,8 +12,8 @@
     </resultMap>
     <insert id="saveCourse">
         insert into courses (course_name, course_location, course_lecturer, course_date)
-            select #{course.courseName}, #{course.courseLocation}, #{course.courseLecturer}, #{course.courseDate}
-                where not exists (select course_name from courses where course_name = #{course.courseName});
+        select #{course.courseName}, #{course.courseLocation}, #{course.courseLecturer}, #{course.courseDate}
+        where not exists (select course_name from courses where course_name = #{course.courseName});
     </insert>
     <update id="updateCourse">
         update
@@ -24,7 +24,7 @@
     <delete id="deleteByCourseName">
         delete
         from courses
-        where course_name = #{courseName};
+        where course_name like concat('%',#{courseName},'%');
     </delete>
     <select id="getCourseByCourseName" resultMap="CourseResultMap">
         select course_name, course_location, course_lecturer, course_date

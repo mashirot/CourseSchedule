@@ -35,6 +35,9 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Result saveCourse(Course course) {
         try {
+            Map<String, String> map = new HashMap<>(1);
+            map.put(course.getCourseShowDate(), course.getCourseShowTime());
+            course.setCourseNormalDate(map);
             course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
         } catch (JsonProcessingException e) {
             return new Result(Code.SAVE_FAILED, null);
@@ -75,12 +78,15 @@ public class CourseServiceImpl implements CourseService {
         for (Course course : list) {
             try {
                 Map<String, String> currentDate = objectMapper.readValue(course.getCourseDate(), mapType);
+                String outputDate = null;
+                String outputTime = null;
                 for (Map.Entry<String, String> entry : currentDate.entrySet()) {
-                    if (!courseDate.equals(entry.getKey())) {
-                        currentDate.remove(entry.getKey(), entry.getValue());
+                    if (courseDate.equals(entry.getKey())) {
+                        outputDate = entry.getKey();
+                        outputTime = entry.getValue();
                     }
                 }
-                courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), currentDate));
+                courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), outputDate, outputTime));
             } catch (JsonProcessingException e) {
                 return new Result(Code.LIST_DATE_FAILED, null);
             }
@@ -91,13 +97,17 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Result listAllCourses() {
         List<Course> list = courseDao.listAllCourses();
+        List<Course> courseList = new ArrayList<>(list.size() * 2 + 1);
         for (Course course : list) {
             try {
                 course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
+                for (Map.Entry<String, String> entry : course.getCourseNormalDate().entrySet()) {
+                    courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), entry.getKey(), entry.getValue()));
+                }
             } catch (JsonProcessingException e) {
                 return new Result(Code.LIST_ALL_FAILED, null);
             }
         }
-        return new Result(Code.LIST_ALL_SUCCESS, list);
+        return new Result(Code.LIST_ALL_SUCCESS, courseList);
     }
 }

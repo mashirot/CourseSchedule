@@ -15,14 +15,16 @@ public class Course {
     private String courseLecturer;
     private String courseDate;
     private Map<String, String> courseNormalDate;
-
+    private String courseShowDate;
+    private String courseShowTime;
     public Course() {
     }
-
-    public Course(String courseName, String courseLocation, String courseLecturer, Map<String, String> courseNormalDate) {
+    public Course(String courseName, String courseLocation, String courseLecturer, String courseShowDate, String courseShowTime) {
         this.courseName = courseName;
         this.courseLocation = courseLocation;
         this.courseLecturer = courseLecturer;
-        this.courseNormalDate = courseNormalDate;
+        this.courseShowDate = courseShowDate;
+        this.courseShowTime = courseShowTime;
     }
+
 }
