@@ -47,4 +47,17 @@ public interface CourseService {
      * @return 结果集合
      */
     Result listAllCourses();
+
+    /**
+     * 获取同一天的有效课程
+     * @param courseDate 日期
+     * @return 结果集合
+     */
+    Result listAllEffectiveByCourseDateCourses(String courseDate);
+
+    /**
+     * 获取所有有效课程
+     * @return 结果集合
+     */
+    Result listAllEffectiveCourses();
 }

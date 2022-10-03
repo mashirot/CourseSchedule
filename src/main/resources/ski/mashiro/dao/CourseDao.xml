@@ -9,16 +9,17 @@
             <result property="courseLocation" column="course_location" jdbcType="VARCHAR"/>
             <result property="courseLecturer" column="course_lecturer" jdbcType="VARCHAR"/>
             <result property="courseDate" column="course_date" jdbcType="OTHER"/>
+            <result property="courseWeek" column="course_week" jdbcType="VARCHAR"/>
     </resultMap>
     <insert id="saveCourse">
-        insert into courses (course_name, course_location, course_lecturer, course_date)
-        select #{course.courseName}, #{course.courseLocation}, #{course.courseLecturer}, #{course.courseDate}
+        insert into courses (course_name, course_location, course_lecturer, course_date, course_week)
+        select #{course.courseName}, #{course.courseLocation}, #{course.courseLecturer}, #{course.courseDate}, #{course.courseWeek}
         where not exists (select course_name from courses where course_name = #{course.courseName});
     </insert>
     <update id="updateCourse">
         update
         courses set
-        course_name = #{course.courseName}, course_location = #{course.courseLocation}, course_lecturer = #{course.courseLecturer}, course_date = #{course.courseDate}
+        course_name = #{course.courseName}, course_location = #{course.courseLocation}, course_lecturer = #{course.courseLecturer}, course_date = #{course.courseDate}, course_week = #{course.courseWeek}
         where course_name = #{course.courseName};
     </update>
     <delete id="deleteByCourseName">
@@ -27,17 +28,17 @@
         where course_name like concat('%',#{courseName},'%');
     </delete>
     <select id="getCourseByCourseName" resultMap="CourseResultMap">
-        select course_name, course_location, course_lecturer, course_date
+        select course_name, course_location, course_lecturer, course_date, course_week
         from courses
         where course_name like concat('%',#{courseName},'%');
     </select>
     <select id="listAllByCourseDateCourses" resultMap="CourseResultMap">
-        select course_name, course_location, course_lecturer, course_date
+        select course_name, course_location, course_lecturer, course_date, course_week
         from courses
         where course_date like concat('%',#{courseDate},'%');
     </select>
     <select id="listAllCourses" resultMap="CourseResultMap">
-        select course_name, course_location, course_lecturer, course_date
+        select course_name, course_location, course_lecturer, course_date, course_week
         from courses;
     </select>
 

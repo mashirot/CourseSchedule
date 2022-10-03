@@ -13,8 +13,7 @@
     <el-container>
         <el-header>
             <template>
-                <label>日期：</label>
-                <el-select @change="listCourseByDate()" v-model="date" placeholder="请选择日期" style="width:15%">
+                <el-select @change="listCourseByDate()" v-model="date" placeholder="请选择日期">
                   <el-option
                     v-for="date in dates"
                     :key="date.value"
@@ -25,7 +24,7 @@
             </template>
             <template>
                 <el-button type="primary" plain @click="submitDialogVisible = true">添加课程</el-button>
-                <el-dialog title="添加课程" :visible.sync="submitDialogVisible" width="60%">
+                <el-dialog title="添加课程" :visible.sync="submitDialogVisible" @close="clearSubmitData" width="60%">
                     <el-form ref="form" :model="form" :rules="rules" label-width="100px">
                         <el-form-item label="课程名称" prop="courseName">
                         <el-input v-model="form.courseName"></el-input>
@@ -36,57 +35,64 @@
                         <el-form-item label="授课老师" prop="courseLecturer">
                         <el-input v-model="form.courseLecturer"></el-input>
                         </el-form-item>
-                        <el-form-item label="日期" prop="courseEndTime">
-                            <el-select v-model="form.courseShowDate" placeholder="请选择日期">
-                                <el-option label="周一" value="Monday"></el-option>
-                                <el-option label="周二" value="Tuesday"></el-option>
-                                <el-option label="周三" value="Wednesday"></el-option>
-                                <el-option label="周四" value="Thursday"></el-option>
-                                <el-option label="周五" value="Friday"></el-option>
-                                <el-option label="周六" value="Saturday"></el-option>
-                                <el-option label="周日" value="Sunday"></el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="时间" prop="courseEndTime">
-                            <el-time-select
-                                placeholder="开始时间"
-                                v-model="form.courseStartTime"
-                                :picker-options="{
-                                    start: '08:10',
-                                    step: '00:05',
-                                    end: '19:55',
-                                }">
-                            </el-time-select>
-                            <label> - </label>
-                            <el-time-select
-                                placeholder="结束时间"
-                                v-model="form.courseEndTime"
-                                :picker-options="{
-                                    start: '08:10',
-                                    step: '00:05',
-                                    end: '19:55',
-                                    minTime: form.courseStartTime
-                                }">
-                            </el-time-select>
+                        <el-form-item label="上课时间" required v-for="(item, index) in form.nums" :key="index">
+                            <el-form :inline="true" ref="form" :model="form" :rules="rules">
+                                <el-form-item prop="courseDate">
+                                    <el-select v-model="form.courseDate[index]" placeholder="请选择日期">
+                                        <el-option label="周一" value="Monday"></el-option>
+                                        <el-option label="周二" value="Tuesday"></el-option>
+                                        <el-option label="周三" value="Wednesday"></el-option>
+                                        <el-option label="周四" value="Thursday"></el-option>
+                                        <el-option label="周五" value="Friday"></el-option>
+                                        <el-option label="周六" value="Saturday"></el-option>
+                                        <el-option label="周日" value="Sunday"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                                    <el-form-item prop="courseStartTime">
+                                        <el-time-select
+                                        placeholder="开始时间"
+                                        v-model="form.courseStartTime[index]"
+                                        :picker-options="{
+                                            start: '08:10',
+                                            step: '00:05',
+                                            end: '19:55',
+                                        }">
+                                    </el-time-select>
+                                </el-form-item>
+                                <label>&nbsp;-&nbsp;&nbsp;&nbsp;</label>
+                                <el-form-item prop="courseEndTime">
+                                    <el-time-select
+                                        placeholder="结束时间"
+                                        v-model="form.courseEndTime[index]"
+                                        :picker-options="{
+                                            start: '08:10',
+                                            step: '00:05',
+                                            end: '19:55',
+                                            minTime: form.courseStartTime[index]
+                                        }">
+                                    </el-time-select>
+                                </el-form-item>
+                                <el-button v-if="index === 0" type="primary" plain @click="submitAddDate()">增加</el-button>
+                                <el-button v-if="index > 0 && index + 1 === form.nums.length" type="danger" plain @click="submitDeleteDate()">删除</el-button>
+                            </el-form>
                         </el-form-item>
                     </el-form>
-
                     <span slot="footer" class="dialog-footer">
-                        <el-button @click="submitDialogVisible = false; clearSubmitData();">取 消</el-button>
+                        <el-button @click="clearSubmitData();">取 消</el-button>
                         <el-button type="primary" @click="submitCourse();">提 交</el-button>
                     </span>
                 </el-dialog>
             </template>
             <template>
                 <el-button @click="deleteDialogVisible = true" type="danger" plain>删除课程</el-button>
-                <el-dialog title="添加课程" :visible.sync="deleteDialogVisible" width="60%">
+                <el-dialog title="添加课程" :visible.sync="deleteDialogVisible" @close="clearDelFormData()" width="60%">
                     <el-form :model="delForm" ref="delForm" label-width="100px">
                         <el-form-item label="课程名称">
                             <el-input v-model="delForm.delCorseName"></el-input>
                         </el-form-item>
                     </el-form>
                     <span slot="footer" class="dialog-footer">
-                        <el-button @click="deleteDialogVisible = false; clearDelFormData();">取 消</el-button>
+                        <el-button @click="clearDelFormData();">取 消</el-button>
                         <el-button type="primary" @click="ensureDel();">删 除</el-button>
                     </span>
                 </el-dialog>
@@ -97,10 +103,9 @@
                 :data="tableData"
                 :header-cell-style="rowStyle"
                 :cell-style="rowStyle"
-                :default-sort = "{prop: 'courseShowDate', order: 'descending'}"
                 border
                 style="width: 100%">
-                <el-table-column prop="courseShowDate" label="日期" sortable></el-table-column>
+                <el-table-column prop="courseShowDate" label="日期" sortable :sort-method="compare"></el-table-column>
                 <el-table-column prop="courseShowTime" label="时间"></el-table-column>
                 <el-table-column prop="courseName" label="课程名"></el-table-column>
                 <el-table-column prop="courseLocation" label="上课地点"></el-table-column>
@@ -113,15 +118,31 @@
     const app = new Vue({
         el: "#app",
         data() {
+            // 有Bug
+            let checkDate = (rule, value, callback) => {
+                if (value.includes(null)) {
+                    callback(new Error("请选择日期"));
+                }
+            };
+            let checkStartTime = (rule, value, callback) => {
+                if (value.includes(null)) {
+                    callback(new Error("请选择开始时间"));
+                }
+            };
+            let checkEndTime = (rule, value, callback) => {
+                if (value.includes(null)) {
+                    callback(new Error("请选择结束时间"));
+                }
+            };
             return {
                 form: {
                     courseName: null,
                     courseLocation: null,
                     courseLecturer: null,
-                    courseShowDate: null,
-                    courseShowTime: null,
-                    courseStartTime: null,
-                    courseEndTime: null
+                    nums: [""],
+                    courseDate: [],
+                    courseStartTime: [],
+                    courseEndTime: []
                 },
                 delForm: {
                     delCorseName: null
@@ -159,24 +180,24 @@
                 ],
                 rules: {
                     courseName: [
-                        { required: true, message: '请输入课程名称', trigger: 'blur' }
+                        { type: 'string', required: true, message: '请输入课程名称', trigger: 'change' }
                     ],
                     courseLocation: [
-                        { required: true, message: '请选择上课地点', trigger: 'blur' }
+                        { type: 'string', required: true, message: '请选择上课地点', trigger: 'change' }
                     ],
                     courseLecturer: [
-                        { required: true, message: '请输入授课老师', trigger: 'blur' }
+                        { type: 'string', required: true, message: '请输入授课老师', trigger: 'change' }
                     ],
-                    courseShowDate: [
-                        { type: 'date', required: true, message: '请选择日期', trigger: 'blur' }
+                    courseDate: [
+                        { required: true, validator: checkDate, trigger: 'blur' }
                     ],
                     courseStartTime: [
-                        { type: 'date', required: true, message: '请选择开始时间', trigger: 'blur' }
+                        { required: true, validator: checkStartTime, trigger: 'blur' }
                     ],
                     courseEndTime: [
-                        { type: 'date', required: true, message: '请选择结束时间', trigger: 'change' }
+                        { required: true, validator: checkEndTime, trigger: 'blur' }
                     ]
-                }
+                },
             }
         },
         methods: {
@@ -216,13 +237,14 @@
                 }
             },
             clearSubmitData() {
-                this.courseName = null;
-                this.courseLocation = null;
-                this.courseLecturer = null;
-                this.courseShowDate = null;
-                this.courseShowTime = null;
-                this.courseStartTime = null;
-                this.courseEndTime = null;
+                this.form.courseName = null;
+                this.form.courseLocation = null;
+                this.form.courseLecturer = null;
+                this.form.nums = [""];
+                this.form.courseDate = [];
+                this.form.courseStartTime = [];
+                this.form.courseEndTime = [];
+                this.submitDialogVisible = false;
             },
             submitCourse() {
                 let _this = this;
@@ -231,8 +253,7 @@
                     courseName: _this.form.courseName,
                     courseLocation: _this.form.courseLocation,
                     courseLecturer: _this.form.courseLecturer,
-                    courseShowDate : _this.form.courseShowDate,
-                    courseShowTime : _this.form.courseStartTime + "-" + _this.form.courseEndTime
+                    courseInputDate : _this.submitTransformDateData()
                 })
                 .then(function (response) {
                     if (response.data.code === 20011) {
@@ -244,12 +265,42 @@
                         _this.msgReminder("添加失败", "warning");
                     } else {
                         _this.clearSubmitData();
-                        _this.msgReminder("系统错误", "warning");
+                        _this.msgReminder("系统错误", "danger");
                     }
                 });
             },
+            submitTransformTimeData() {
+                let result = [];
+                for(let i = 0; i < this.form.nums.length; i++) {
+                    result[i] = this.form.courseStartTime[i] + "-" + this.form.courseEndTime[i];
+                }
+                return result;
+            },
+            submitTransformDateData() {
+                let result = [];
+                for (let i = 0; i < this.form.nums.length; i++) {
+                    result[i] = this.form.courseDate[i] + " " + this.submitTransformTimeData()[i];
+                }
+                return result;
+            },
+            submitAddDate() {
+                this.form.nums.push("");
+            },
+            submitDeleteDate() {
+                if (this.form.courseDate.length - this.form.nums.length >= 0) {
+                    this.form.courseDate.pop();
+                }
+                if (this.form.courseStartTime.length - this.form.nums.length >= 0) {
+                    this.form.courseStartTime.pop();
+                }
+                if (this.form.courseEndTime.length - this.form.nums.length >= 0) {
+                    this.form.courseEndTime.pop();
+                }
+                this.form.nums.pop();
+            },
             clearDelFormData() {
                 this.delForm.delCorseName = null;
+                this.deleteDialogVisible = false;
             },
             delCourse() {
                 let _this = this;
@@ -283,6 +334,25 @@
                         message: '已取消删除'
                     });
                 });
+            },
+            compare(obj1, obj2) {
+                let o1 = obj1.courseShowDate;
+                let o2 = obj2.courseShowDate;
+                if (o1 === "Monday") o1 = 1;
+                if (o2 === "Monday") o2 = 1;
+                if (o1 === "Tuesday") o1 = 2;
+                if (o2 === "Tuesday") o2 = 2;
+                if (o1 === "Wednesday") o1 = 3;
+                if (o2 === "Wednesday") o2 = 3;
+                if (o1 === "Thursday") o1 = 4;
+                if (o2 === "Thursday") o2 = 4;
+                if (o1 === "Friday") o1 = 5;
+                if (o2 === "Friday") o2 = 5;
+                if (o1 === "Saturday") o1 = 6;
+                if (o2 === "Saturday") o2 = 6;
+                if (o1 === "Sunday") o1 = 7;
+                if (o2 === "Sunday") o2 = 7;
+                return o1 - o2;
             },
         },
     });
