@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ski.mashiro.dao.UserDao">
+    <resultMap id="UserResultMap" type="ski.mashiro.pojo.User">
+        <result property="userCode" column="user_code" jdbcType="VARCHAR"/>
+        <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
+        <result property="userNickname" column="user_nickname" jdbcType="VARCHAR"/>
+        <result property="termInitialDate" column="user_term_initial_date" jdbcType="DATE"/>
+        <result property="currentDate" column="user_current_date" jdbcType="DATE"/>
+        <result property="currentWeek" column="user_current_week" jdbcType="VARCHAR"/>
+    </resultMap>
+    <insert id="saveUser">
+        insert into user (user_code, user_password, user_nickname, user_term_initial_date, user_current_date, user_current_week)
+        select #{user.userCode}, #{user.userPassword}, #{user.userNickname}, #{user.termInitialDate}, #{user.currentDate}, #{user.currentWeek}
+        where not exists (select #{user.userCode} from user where user_code = #{user.userCode});
+    </insert>
+    <update id="updateCurrentDate">
+        update user
+        set user_current_date = #{currentDate}, user_current_week = #{currentWeek}
+        where user_code = #{userCode};
+    </update>
+    <update id="updateUserPassword">
+        update user
+        set user_password = #{userPassword}
+        where user_code = #{userCode};
+    </update>
+    <delete id="deleteUser">
+        delete
+        from user
+        where user_code = #{userCode} and user_password = #{userPassword};
+    </delete>
+    <select id="getUser" resultMap="UserResultMap">
+        select user_code, user_nickname, user_term_initial_date, user_current_date, user_current_week
+        from user where user_code = #{userCode} and user_password = #{userPassword};
+    </select>
+    <select id="getInitDate" resultType="java.util.Date">
+        select user_term_initial_date
+        from user where user_code = #{userCode};
+    </select>
+</mapper>

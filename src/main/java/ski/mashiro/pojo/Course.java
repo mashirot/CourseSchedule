@@ -28,5 +28,4 @@ public class Course {
         this.courseShowDate = courseShowDate;
         this.courseShowTime = courseShowTime;
     }
-
 }
