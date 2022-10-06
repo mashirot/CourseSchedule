@@ -27,34 +27,34 @@ public class TestCourseDao {
         map.put("Monday", "14:00-15:30");
         course.setCourseNormalDate(map);
         course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
-        System.out.println((courseDao.saveCourse(course) != 0));
+        System.out.println((courseDao.saveCourse(course, "") != 0));
     }
 
     @Test
     void testDeleteByCourseName() {
-        System.out.println(courseDao.deleteByCourseName("测试") != 0);
+        System.out.println(courseDao.deleteByCourseName("测试", "") != 0);
     }
 
     @Test
     void testUpdateCourse() {
-        Course course = courseDao.getCourseByCourseName("测试");
+        Course course = courseDao.getCourseByCourseName("测试", "");
         course.setCourseLocation("秦城监狱");
-        courseDao.updateCourse(course);
+        courseDao.updateCourse(course, "");
     }
 
     @Test
     void testGetCourseByCourseName() {
-        Course course = courseDao.getCourseByCourseName("测试");
+        Course course = courseDao.getCourseByCourseName("测试", "");
         System.out.println(course);
     }
 
     @Test
     void testListAllByCourseDateCourses() {
-        System.out.println(courseDao.listAllByCourseDateCourses("Sunday"));
+        System.out.println(courseDao.listAllByCourseDateCourses("Sunday", ""));
     }
 
     @Test
     void testListAllCourses() {
-        System.out.println(courseDao.listAllCourses());
+        System.out.println(courseDao.listAllCourses(""));
     }
 }

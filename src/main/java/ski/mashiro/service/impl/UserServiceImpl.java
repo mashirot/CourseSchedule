@@ -2,11 +2,13 @@ package ski.mashiro.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ski.mashiro.dao.TableDao;
 import ski.mashiro.dao.UserDao;
 import ski.mashiro.pojo.Code;
 import ski.mashiro.pojo.Result;
 import ski.mashiro.pojo.User;
 import ski.mashiro.service.UserService;
+import ski.mashiro.util.Utils;
 
 import java.util.Date;
 
@@ -17,41 +19,54 @@ import java.util.Date;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
+    private final TableDao tableDao;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao) {
+    public UserServiceImpl(UserDao userDao, TableDao tableDao) {
         this.userDao = userDao;
+        this.tableDao = tableDao;
     }
 
     @Override
     public Result saveUser(User user) {
-        user.setCurrentWeek(calcCurrentWeek(user.getCurrentDate(), user.getTermInitialDate()));
-        return new Result(userDao.saveUser(user) == 1 ? Code.SAVE_USER_SUCCESS : Code.SAVE_USER_FAILED, null);
+        user.setUserTableName(Utils.transitionTableName(user.getUserCode()));
+        int rs = userDao.saveUser(user);
+        if (rs == 1) {
+            tableDao.createTable(user.getUserTableName());
+            return new Result(Code.SAVE_USER_SUCCESS, null);
+        }
+        return new Result(Code.SAVE_USER_FAILED, null);
     }
 
     @Override
-    public Result deleteUser(String userCode, String userPasswd) {
-        return new Result(userDao.deleteUser(userCode, userPasswd) == 1 ? Code.DELETE_USER_SUCCESS : Code.DELETE_USER_FAILED, null);
+    public Result deleteUser(String userCode) {
+        int rs = userDao.deleteUser(userCode);
+        if (rs == 1) {
+            tableDao.deleteTable(Utils.transitionTableName(userCode));
+            return new Result(Code.DELETE_USER_SUCCESS, null);
+        }
+        return new Result(Code.DELETE_USER_FAILED, null);
     }
 
     @Override
-    public Result updateCurrentWeek(String userCode, Date currentDate) {
-        int rs = userDao.updateCurrentDate(userCode, currentDate, calcCurrentWeek(currentDate, userDao.getInitDate(userCode)));
-        return new Result(rs == 1 ? Code.UPDATE_USER_CURRENT_WEEK_SUCCESS : Code.UPDATE_USER_CURRENT_WEEK_FAILED, null);
+    public Result updateUser(User user) {
+        return new Result(userDao.updateUser(user) == 1 ? Code.UPDATE_USER_SUCCESS : Code.UPDATE_USER_FAILED, null);
     }
 
     @Override
-    public Result updateUserPassword(String userCode, String userPassword) {
-        return new Result(userDao.updateUserPassword(userCode, userPassword) == 1 ? Code.UPDATE_USER_PASSWORD_SUCCESS : Code.UPDATE_USER_PASSWORD_FAILED, null);
+    public Result getInitDate(String userCode) {
+        Date initDate = userDao.getInitDate(userCode);
+        return new Result(initDate != null ? Code.GET_USER_INIT_DATE_SUCCESS : Code.GET_USER_INIT_DATE_FAILED, initDate);
     }
 
     @Override
     public Result getUser(String userCode, String userPasswd) {
         User user = userDao.getUser(userCode, userPasswd);
-        return new Result(user != null ? Code.GET_USER_SUCCESS : Code.GET_USER_FAILED, user);
+        if (user != null) {
+            user.setCurrentWeek(Utils.calcCurrentWeek(new Date(), user.getTermInitialDate()));
+            return new Result(Code.GET_USER_SUCCESS, user);
+        }
+        return new Result(Code.GET_USER_FAILED, null);
     }
 
-    private String calcCurrentWeek(Date currentDate, Date initDate) {
-        return String.valueOf((currentDate.getTime() - initDate.getTime() + 7 * 24 * 60 * 60 * 1000) / (7 * 24 * 60 * 60 * 1000) + 1);
-    }
 }

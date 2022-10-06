@@ -21,11 +21,12 @@ public class Course {
     private String[] courseInputDate;
     public Course() {
     }
-    public Course(String courseName, String courseLocation, String courseLecturer, String courseShowDate, String courseShowTime) {
+    public Course(String courseName, String courseLocation, String courseLecturer, String courseShowDate, String courseShowTime, String courseWeek) {
         this.courseName = courseName;
         this.courseLocation = courseLocation;
         this.courseLecturer = courseLecturer;
         this.courseShowDate = courseShowDate;
         this.courseShowTime = courseShowTime;
+        this.courseWeek = courseWeek;
     }
 }

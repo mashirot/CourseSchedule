@@ -28,12 +28,15 @@ public class Code {
     public static final Integer DELETE_USER_SUCCESS = 10021;
     public static final Integer DELETE_USER_FAILED = 10020;
 
-    public static final Integer UPDATE_USER_CURRENT_WEEK_SUCCESS = 10031;
-    public static final Integer UPDATE_USER_CURRENT_WEEK_FAILED = 10030;
+    public static final Integer UPDATE_USER_SUCCESS = 10031;
+    public static final Integer UPDATE_USER_FAILED = 10030;
 
-    public static final Integer UPDATE_USER_PASSWORD_SUCCESS = 10031;
-    public static final Integer UPDATE_USER_PASSWORD_FAILED = 10030;
+    public static final Integer GET_USER_SUCCESS = 10061;
+    public static final Integer GET_USER_FAILED = 10060;
 
-    public static final Integer GET_USER_SUCCESS = 10031;
-    public static final Integer GET_USER_FAILED = 10030;
+    public static final Integer GET_USER_INIT_DATE_SUCCESS = 10071;
+    public static final Integer GET_USER_INIT_DATE_FAILED = 10070;
+
+    public static final Integer USER_LOGOUT_SUCCESS = 30011;
+    public static final Integer USER_LOGOUT_FAILED = 30010;
 }

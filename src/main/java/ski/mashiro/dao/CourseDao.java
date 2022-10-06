@@ -11,10 +11,10 @@ import java.util.List;
 */
 @Mapper
 public interface CourseDao {
-    int saveCourse(@Param("course") Course course);
-    int deleteByCourseName(@Param("courseName") String courseName);
-    int updateCourse(@Param("course") Course course);
-    Course getCourseByCourseName(@Param("courseName") String courseName);
-    List<Course> listAllByCourseDateCourses(@Param("courseDate") String courseDate);
-    List<Course> listAllCourses();
+    int saveCourse(@Param("course") Course course, @Param("tableName") String tableName);
+    int deleteByCourseName(@Param("courseName") String courseName, @Param("tableName") String tableName);
+    int updateCourse(@Param("course") Course course, @Param("tableName") String tableName);
+    Course getCourseByCourseName(@Param("courseName") String courseName, @Param("tableName") String tableName);
+    List<Course> listAllByCourseDateCourses(@Param("courseDate") String courseDate, @Param("tableName") String tableName);
+    List<Course> listAllCourses(@Param("tableName") String tableName);
 }

@@ -8,31 +8,29 @@
         <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
         <result property="userNickname" column="user_nickname" jdbcType="VARCHAR"/>
         <result property="termInitialDate" column="user_term_initial_date" jdbcType="DATE"/>
-        <result property="currentDate" column="user_current_date" jdbcType="DATE"/>
-        <result property="currentWeek" column="user_current_week" jdbcType="VARCHAR"/>
+        <result property="userTableName" column="user_table_name" jdbcType="VARCHAR"/>
     </resultMap>
     <insert id="saveUser">
-        insert into user (user_code, user_password, user_nickname, user_term_initial_date, user_current_date, user_current_week)
-        select #{user.userCode}, #{user.userPassword}, #{user.userNickname}, #{user.termInitialDate}, #{user.currentDate}, #{user.currentWeek}
+        insert into user (user_code, user_password, user_nickname, user_term_initial_date, user_table_name)
+        select #{user.userCode}, #{user.userPassword}, #{user.userNickname}, #{user.termInitialDate}, #{user.userTableName}
         where not exists (select #{user.userCode} from user where user_code = #{user.userCode});
     </insert>
-    <update id="updateCurrentDate">
+    <update id="updateUser">
         update user
-        set user_current_date = #{currentDate}, user_current_week = #{currentWeek}
-        where user_code = #{userCode};
-    </update>
-    <update id="updateUserPassword">
-        update user
-        set user_password = #{userPassword}
-        where user_code = #{userCode};
+        <set>
+            <if test="user.userPassword != null">user_password = #{user.userPassword}</if>
+            <if test="user.userNickname != null">user_nickname = #{user.userNickname}</if>
+            <if test="user.termInitialDate != null">user_term_initial_date = #{user.termInitialDate}</if>
+        </set>
+        where user_code = #{user.userCode};
     </update>
     <delete id="deleteUser">
         delete
         from user
-        where user_code = #{userCode} and user_password = #{userPassword};
+        where user_code = #{userCode};
     </delete>
     <select id="getUser" resultMap="UserResultMap">
-        select user_code, user_nickname, user_term_initial_date, user_current_date, user_current_week
+        select user_code, user_nickname, user_term_initial_date, user_table_name
         from user where user_code = #{userCode} and user_password = #{userPassword};
     </select>
     <select id="getInitDate" resultType="java.util.Date">

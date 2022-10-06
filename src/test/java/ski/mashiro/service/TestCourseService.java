@@ -28,37 +28,37 @@ public class TestCourseService {
         map.put("Monday", "14:00-15:30");
         course.setCourseNormalDate(map);
         course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
-        System.out.println((courseService.saveCourse(course)));
+        System.out.println((courseService.saveCourse(course, "")));
     }
 
     @Test
     void testDeleteByCourseName() {
-        System.out.println(courseService.deleteByCourseName("测试"));
+        System.out.println(courseService.deleteByCourseName("测试", ""));
     }
 
     @Test
     void testUpdateCourse() {
-        Result rs = courseService.getCourseByCourseName("测试");
+        Result rs = courseService.getCourseByCourseName("测试", "");
         Course data = (Course) rs.getData();
         data.setCourseLocation("秦城监狱");
-        Result result = courseService.updateCourse(data);
+        Result result = courseService.updateCourse(data, "");
         System.out.println(result);
     }
 
     @Test
     void testGetCourseByCourseName() {
-        Result course = courseService.getCourseByCourseName("测试");
+        Result course = courseService.getCourseByCourseName("测试", "");
         Course data = (Course) course.getData();
         System.out.println(data.getCourseNormalDate());
     }
 
     @Test
     void testListAllByCourseDateCourses() {
-        System.out.println(courseService.listAllByCourseDateCourses("Sunday"));
+        System.out.println(courseService.listAllByCourseDateCourses("Sunday", ""));
     }
 
     @Test
     void testListAllCourses() {
-        System.out.println(courseService.listAllCourses());
+        System.out.println(courseService.listAllCourses(""));
     }
 }

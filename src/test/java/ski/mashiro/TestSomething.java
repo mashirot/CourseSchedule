@@ -3,10 +3,8 @@ package ski.mashiro;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ski.mashiro.util.Utils;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,8 +23,8 @@ public class TestSomething {
     }
 
     @Test
-    void testDate() throws Exception {
-
-
+    void testDate() {
+        System.out.println(Utils.transitionTableName("123"));
+        System.out.println(Utils.transitionTableName("321"));
     }
 }

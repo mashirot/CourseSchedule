@@ -13,7 +13,7 @@
     <el-container>
         <el-header>
             <template>
-                <el-select @change="listCourseByDate()" v-model="date" placeholder="请选择日期">
+                <el-select @change="listEffCourseByDate()" v-model="date" placeholder="请选择日期">
                   <el-option
                     v-for="date in dates"
                     :key="date.value"
@@ -34,6 +34,9 @@
                         </el-form-item>
                         <el-form-item label="授课老师" prop="courseLecturer">
                         <el-input v-model="form.courseLecturer"></el-input>
+                        </el-form-item>
+                        <el-form-item label="上课周数" prop="courseWeek">
+                        <el-input v-model="form.courseWeek"></el-input>
                         </el-form-item>
                         <el-form-item label="上课时间" required v-for="(item, index) in form.nums" :key="index">
                             <el-form :inline="true" ref="form" :model="form" :rules="rules">
@@ -84,8 +87,8 @@
                 </el-dialog>
             </template>
             <template>
-                <el-button @click="deleteDialogVisible = true" type="danger" plain>删除课程</el-button>
-                <el-dialog title="添加课程" :visible.sync="deleteDialogVisible" @close="clearDelFormData()" width="60%">
+                <el-button @click="deleteCourseDialogVisible = true" type="danger" plain>删除课程</el-button>
+                <el-dialog title="添加课程" :visible.sync="deleteCourseDialogVisible" @close="clearDelFormData()" width="60%">
                     <el-form :model="delForm" ref="delForm" label-width="100px">
                         <el-form-item label="课程名称">
                             <el-input v-model="delForm.delCorseName"></el-input>
@@ -97,6 +100,72 @@
                     </span>
                 </el-dialog>
             </template>
+            <template>
+
+                <el-dropdown @command="profileFunctions">
+                    <el-button>{{ userNickname }}<i class="el-icon-arrow-down el-icon--right" style="text-align: right;"></i></el-button>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item command="modifyProfile">修改信息</el-dropdown-item>
+                        <el-dropdown-item command="delUser">注销</el-dropdown-item>
+                        <el-dropdown-item command="exit">退出</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+
+                <el-dialog title="个人信息" :visible.sync="ModifyUserDialogVisible" :before-close="clearProfileTable">
+                    <el-form :model="profileTable" :rules="modifyRules">
+                        <el-form-item label="学号：" prop="userCode">
+                            {{ profileTable.userCode }}
+                        </el-input>
+                        </el-form-item>
+                        <el-form-item label="密码" prop="userPassword">
+                            <el-input v-model="profileTable.userPassword" placeholder="留空则不修改" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="昵称" prop="userNickname">
+                            <el-input v-model="profileTable.userNickname" placeholder="留空则不修改" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="学期开始日期" prop="termInitialDate">
+                            <el-date-picker
+                                v-model="profileTable.termInitialDate"
+                                type="date"
+                                placeholder="留空则不修改">
+                            </el-date-picker>
+                        </el-form-item>
+                        <p>修改日期请重新登陆</p>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                      <el-button @click="clearProfileTable()">取 消</el-button>
+                      <el-button type="primary" @click="submitModifyProfile()">修 改</el-button>
+                    </div>
+                </el-dialog>
+
+                <el-dialog title="注销验证" :visible.sync="verifyDeleteUserDialogVisible" :before-close="clearVerifyUserForm">
+                    <el-form :model="verifyUser" :rules="verifyRules">
+                      <el-form-item label="学号" prop="userCode">{{ verifyUser.userCode }}</el-input>
+                      </el-form-item>
+                      <el-form-item label="密码" prop="userPassword">
+                        <el-input v-model="verifyUser.userPassword" autocomplete="off"></el-input>
+                      </el-form-item>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                      <el-button @click="clearVerifyUserForm()">取 消</el-button>
+                      <el-button type="primary" @click="submitVerifyUser(ensureDeleteUserDialogVisible)">验 证</el-button>
+                    </div>
+                </el-dialog>
+
+                <el-dialog title="注销" :visible.sync="ensureDeleteUserDialogVisible">
+                      <el-button @click="ensureDeleteUserDialogVisible = false;">取 消</el-button>
+                      <el-button type="danger" @click="sumbitDelUser()">注 销</el-button>
+                </el-dialog>
+
+                <el-dialog title="退出确认" :visible.sync="exitUserDialogVisible">
+                      <el-button @click="exitUserDialogVisible = false;">取 消</el-button>
+                      <el-button type="danger" @click="ensureExit()">确 认</el-button>
+                </el-dialog>
+                  
+            </template>
+            <template>
+                第 {{ currentWeek }} 周
+            </template>
         </el-header>
         <el-main>
             <el-table
@@ -107,6 +176,7 @@
                 style="width: 100%">
                 <el-table-column prop="courseShowDate" label="日期" sortable :sort-method="compare"></el-table-column>
                 <el-table-column prop="courseShowTime" label="时间"></el-table-column>
+                <el-table-column prop="courseWeek" label="周数"></el-table-column>
                 <el-table-column prop="courseName" label="课程名"></el-table-column>
                 <el-table-column prop="courseLocation" label="上课地点"></el-table-column>
                 <el-table-column prop="courseLecturer" label="授课老师"></el-table-column>
@@ -115,6 +185,7 @@
     </el-container>
 </div>
 <script>
+    const _window = window;
     const app = new Vue({
         el: "#app",
         data() {
@@ -135,10 +206,13 @@
                 }
             };
             return {
+                userNickname: getCookie("userNickname"),
+                currentWeek: getCookie("currentWeek"),
                 form: {
                     courseName: null,
                     courseLocation: null,
                     courseLecturer: null,
+                    courseWeek: null,
                     nums: [""],
                     courseDate: [],
                     courseStartTime: [],
@@ -147,8 +221,21 @@
                 delForm: {
                     delCorseName: null
                 },
+                verifyUser: {
+                    userCode: getCookie("userCode"),
+                    userPassword: null
+                },
+                profileTable: {
+                    userCode: null,
+                    userNickname: null,
+                    termInitialDate: null
+                },
                 submitDialogVisible: false,
-                deleteDialogVisible: false,
+                ModifyUserDialogVisible: false,
+                deleteCourseDialogVisible: false,
+                verifyDeleteUserDialogVisible: false,
+                ensureDeleteUserDialogVisible: false,
+                exitUserDialogVisible: false,
                 tableData: [],
                 date: null,
                 dates: [
@@ -188,6 +275,27 @@
                     courseLecturer: [
                         { type: 'string', required: true, message: '请输入授课老师', trigger: 'change' }
                     ],
+                    courseWeek: [
+                        { type: 'string', required: true, message: '请输入上课周数', trigger: 'change' },
+                        { pattern: /\d{1,2}-\d{1,2}/, message: '请输入正确的格式 [xx]-[xx]', trigger: 'change' },
+                        { 
+                            type: 'string',
+                            message: '小周在前，大周在后',
+                            trigger: 'change',
+                            transform(value) {
+                                if(value !== null && value !== '') {
+                                    week = value.split("-");
+                                    if (Number(week[0]) <= Number(week[1])) {
+                                        return value;
+                                    } else {
+                                        return false;
+                                    }
+                                }else {
+                                    return null;
+                                }
+                            }
+                        },
+                    ],
                     courseDate: [
                         { required: true, validator: checkDate, trigger: 'blur' }
                     ],
@@ -198,6 +306,25 @@
                         { required: true, validator: checkEndTime, trigger: 'blur' }
                     ]
                 },
+                verifyRules: {
+                    userPassword: [
+                        { type: 'string', required: true, message: '请输入密码', trigger: 'change' },
+                        { min: 8, max: 20, message: '长度在 8 到 20 个字符', trigger: 'change' }
+                    ],
+                },
+                modifyRules: {
+                        userPassword: [
+                            { type: 'string', required: false, message: '请输入密码', trigger: 'change' },
+                            { min: 8, max: 20, message: '长度在 8 到 20 个字符', trigger: 'change' }
+                        ],
+                        userNickname: [
+                            { type: 'string', required: false, message: '请输入昵称', trigger: 'change' },
+                            { min: 1, max: 12, message: '长度在 8 到 20 个字符', trigger: 'change' }
+                        ],
+                        termInitialDate: [
+                            { type: 'date', required: false, message: '学期开始日期', trigger: 'change' }
+                        ],
+                    },
             }
         },
         methods: {
@@ -212,7 +339,7 @@
             },
             getSchedule() {
                 let _this = this;
-                axios.get("/schedules")
+                axios.get("/schedules/all")
                 .then(function (response) {
                     if (response.data.code === 20061) {
                         _this.tableData = response.data.data;
@@ -222,6 +349,32 @@
                 });
             },
             listCourseByDate() {
+                let _this = this;
+                if (_this.date !== "All") {
+                    axios.get("/schedules/courseDate/all/" + _this.date)
+                    .then(function (response) {
+                        if (response.data.code === 20051) {
+                            _this.tableData = response.data.data;
+                        } else {
+                            _this.msgReminder("获取数据失败，请刷新重试！", "warning");
+                        }
+                    });
+                } else {
+                    _this.getSchedule();
+                }
+            },
+            getEffSchedule() {
+                let _this = this;
+                axios.get("/schedules")
+                .then(function (response) {
+                    if (response.data.code === 20061) {
+                        _this.tableData = response.data.data;
+                    } else {
+                        _this.msgReminder("获取数据失败，请刷新重试！", "warning");
+                    }
+                });
+            },
+            listEffCourseByDate() {
                 let _this = this;
                 if (_this.date !== "All") {
                     axios.get("/schedules/courseDate/" + _this.date)
@@ -248,11 +401,18 @@
             },
             submitCourse() {
                 let _this = this;
+                if (_this.form.courseName == null || _this.form.courseLocation == null || _this.form.courseLecturer == null 
+                    || _this.form.courseWeek == null || _this.form.courseWeek == null || _this.form.courseDate.includes(null) 
+                    || _this.form.courseStartTime.includes(null) || _this.form.courseEndTime.includes(null)) {
+                    _this.msgReminder("请完善课程信息", "warning");
+                    return;
+                }
                 _this.submitDialogVisible = false;
                 axios.post('/schedules', {
                     courseName: _this.form.courseName,
                     courseLocation: _this.form.courseLocation,
                     courseLecturer: _this.form.courseLecturer,
+                    courseWeek: _this.form.courseWeek,
                     courseInputDate : _this.submitTransformDateData()
                 })
                 .then(function (response) {
@@ -300,11 +460,11 @@
             },
             clearDelFormData() {
                 this.delForm.delCorseName = null;
-                this.deleteDialogVisible = false;
+                this.deleteCourseDialogVisible = false;
             },
             delCourse() {
                 let _this = this;
-                _this.deleteDialogVisible = false;
+                _this.deleteCourseDialogVisible = false;
                 axios.delete('/schedules/' + _this.delForm.delCorseName)
                 .then(function (response) {
                     if (response.data.code === 20021) {
@@ -354,9 +514,118 @@
                 if (o2 === "Sunday") o2 = 7;
                 return o1 - o2;
             },
+            profileFunctions(cmd) {
+                if (cmd === "modifyProfile") this.modifyProfile();
+                if (cmd === "exit") this.exit();
+                if (cmd === "delUser") this.delUser();
+            },
+            modifyProfile() {
+                this.ModifyUserDialogVisible = true;
+            },
+            submitModifyProfile() {
+                let _this = this;
+                axios.put('/users', {
+                    userCode: getCookie("userCode"),
+                    userPassword: _this.profileTable.userPassword,
+                    userNickname: _this.profileTable.userNickname,
+                    termInitialDate: _this.profileTable.termInitialDate
+                })
+                .then(function (response) {
+                    if (response.data.code === 10031) {
+                        _this.msgReminder("修改成功", "success");
+                        _this.clearProfileTable();
+                    } else if (response.data.code === 10030) {
+                        _this.msgReminder("修改失败", "warning");
+                        _this.clearProfileTable();
+                    } else {
+                        _this.msgReminder("系统错误", "danger");
+                        _this.clearProfileTable();
+                    }
+                });
+            },
+            clearProfileTable() {
+                this.ModifyUserDialogVisible = false;
+                this.profileTable.userCode = null;
+                this.profileTable.userNickname = null;
+                this.profileTable.termInitialDate = null;
+                this.profileTable.currentWeek = null;
+            },
+            delUser() {
+                this.verifyDeleteUserDialogVisible = true;
+            },
+            clearVerifyUserForm() {
+                this.verifyDeleteUserDialogVisible = false;
+                this.verifyUser.userPassword = null;
+            },
+            submitVerifyUser() {
+                let _this = this;
+                if (_this.verifyUser.userCode === null || _this.verifyUser.userPassword === null) {
+                    _this.msgReminder("请填写验证信息", "warning");
+                    return;
+                }
+                axios.post('/users/login', {
+                    userCode: _this.verifyUser.userCode,
+                    userPassword: _this.verifyUser.userPassword
+                })
+                .then(function (response) {
+                    if (response.data.code === 10061) {
+                        _this.clearVerifyUserForm();
+                        _this.verifyDeleteUserDialogVisible = true;
+                    } else if (response.data.code === 10060) {
+                        _this.msgReminder("验证失败", "warning");
+                        _this.clearVerifyUserForm();
+                    } else {
+                        _this.msgReminder("系统错误", "danger");
+                        _this.clearVerifyUserForm();
+                    }
+                });
+            },
+            sumbitDelUser() {
+                let _this = this;
+                if (_this.ensureDeleteUserDialogVisible === true) {
+                    axios.delete('/users/' + _this.verifyUser.userCode)
+                    .then(function (response) {
+                        if (response.data.code === 10021) {
+                            _this.msgReminder("注销成功", "success");
+                            _this.ensureDeleteUserDialogVisible = false;
+                            _window.setTimeout("_window.location.href = './Login.html';", 1000);
+                        } else if (response.data.code === 10020) {
+                            _this.msgReminder("注销失败", "warning");
+                            _this.ensureDeleteUserDialogVisible = false;
+                        } else {
+                            _this.msgReminder("系统错误", "danger");
+                            _this.ensureDeleteUserDialogVisible = false;
+                        }
+                    });
+                }
+            },
+            exit() {
+                this.exitUserDialogVisible = true;
+            },
+            ensureExit() {
+                let _this = this;
+                axios.post('/users/logout')
+                .then(function (response) {
+                    if (response.data.code === 30011) {
+                        _this.msgReminder("退出成功", "success");
+                        _window.setTimeout("_window.location.href = './Login.html';", 1500);
+                    } else {
+                        _this.msgReminder("系统错误", "danger");
+                    }
+                });
+            },
         },
     });
-    app.getSchedule();
+    app.getEffSchedule();
+    function getCookie(cname){
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i<ca.length; i++) {
+            var c = ca[i].trim();
+            if (c.indexOf(name)==0) { return c.substring(name.length,c.length); }
+        }
+        return "";
+    } 
 </script>
 <style>
   .el-header, .el-footer {
@@ -364,13 +633,6 @@
     color: #333;
     line-height: 60px;
   }
-  .el-aside {
-    background-color: #D3DCE6;
-    color: #333;
-    text-align: center;
-    line-height: 200px;
-  }
-  
   .el-main {
     background-color: #E9EEF3;
     color: #333;

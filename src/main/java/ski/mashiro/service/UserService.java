@@ -3,8 +3,6 @@ package ski.mashiro.service;
 import ski.mashiro.pojo.Result;
 import ski.mashiro.pojo.User;
 
-import java.util.Date;
-
 /**
  * @author MashiroT
  */
@@ -20,26 +18,23 @@ public interface UserService {
     /**
      * 删除用户
      * @param userCode 学号
-     * @param userPasswd 密码
      * @return 结果
      */
-    Result deleteUser(String userCode, String userPasswd);
+    Result deleteUser(String userCode);
 
     /**
-     * 同步日期
-     * @param userCode 学号
-     * @param currentDate 当前日期
+     * 更新用户信息
+     * @param user 入参
      * @return 结果
      */
-    Result updateCurrentWeek(String userCode, Date currentDate);
+    Result updateUser(User user);
 
     /**
-     * 修改用户密码
+     * 获取学期开始日期
      * @param userCode 学号
-     * @param userPassword 密码
      * @return 结果
      */
-    Result updateUserPassword(String userCode, String userPassword);
+    Result getInitDate(String userCode);
 
     /**
      * 判断用户是否存在

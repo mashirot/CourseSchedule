@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <script src="https://cdn.feczine.cn/library/axios/axios.min.js"></script>
+    <script src="https://cdn.feczine.cn/library/vue/vue2/vue.js"></script>
+    <link rel="stylesheet" href="https://cdn.feczine.cn/library/element-ui/index.css">
+    <script src="https://cdn.feczine.cn/library/element-ui/index.js"></script>
+</head>
+<body>
+    <div id="app">
+        <el-container>
+            <el-header>用户注册</el-header>
+            <el-main>
+                    <el-form :model="registerForm" :rules="rules" ref="registerForm" label-width="15%" size="medium">
+                        <el-form-item label="学号" prop="userCode">
+                            <el-input v-model="registerForm.userCode"></el-input>
+                        </el-form-item>
+                        <el-form-item label="密码" prop="userPassword">
+                            <el-input v-model="registerForm.userPassword"></el-input>
+                        </el-form-item>
+                        </el-form-item>
+                        <el-form-item label="昵称" prop="userNickname">
+                            <el-input v-model="registerForm.userNickname"></el-input>
+                        </el-form-item>
+                        </el-form-item>
+                        <el-form-item label="学期开始日期" prop="termInitialDate">
+                            <el-date-picker
+                                v-model="registerForm.termInitialDate"
+                                type="date"
+                                placeholder="选择日期">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="今日日期" prop="currentDate">
+                            {{ showTodayDate }}
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button @click="_window.location.href = 'http://127.0.0.1/login.html';">登录</el-button>
+                            <el-button type="primary" @click="submitRegisterForm()">注册</el-button>
+                        </el-form-item>
+                    </el-form>
+            </el-main>
+          </el-container>
+    </div>
+
+    <script>
+        const _window = window;
+        const app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    todayDate: new Date(),
+                    showTodayDate: null,
+                    registerForm: {
+                        userCode: null,
+                        userPassword: null,
+                        userNickname: null,
+                        termInitialDate: null
+                    },
+                    rules: {
+                        userCode: [
+                            { required: true, message: '请输入学号', trigger: 'change'},
+                            { min: 3, max: 30, message: '长度在 3 到 30个字符', trigger: 'change' },
+                            { 
+                                type: 'number',
+                                message: '学号必须为数字',
+                                trigger: 'change',
+                                transform(value) {
+                                    if(value !== null && value !== '') {
+                                        if (String(value).trim() === '' || Number(value) < 100 || Number(value) > 999999999999999999999999999999) {
+                                            return false;
+                                        }else{
+                                            return Number(value);
+                                        }
+                                    }else {
+                                        return null;
+                                    }
+                                }
+                            },
+                        ],
+                        userPassword: [
+                            { type: 'string', required: true, message: '请输入密码', trigger: 'change' },
+                            { min: 8, max: 20, message: '长度在 8 到 20 个字符', trigger: 'change' }
+                        ],
+                        userNickname: [
+                            { type: 'string', required: true, message: '请输入昵称', trigger: 'change' },
+                            { min: 1, max: 12, message: '长度在 8 到 20 个字符', trigger: 'change' }
+                        ],
+                        termInitialDate: [
+                            { type: 'date', required: true, message: '学期开始日期', trigger: 'change' }
+                        ],
+                    },
+                }
+            },
+            methods: {
+                msgReminder(msg, type) {
+                    this.$message({
+                        message: msg,
+                        type: type
+                    });
+                },
+                submitRegisterForm() {
+                    let _this = this;
+                    if (_this.registerForm.userCode === null || _this.registerForm.userPassword === null || _this.registerForm.userNickname === null || _this.registerForm.termInitialDate === null || _this.todayDate === null) {
+                        _this.msgReminder("请完善注册信息", "warning");
+                        return;
+                    }
+                    axios.post('/users/register', {
+                        userCode: _this.registerForm.userCode,
+                        userPassword: _this.registerForm.userPassword,
+                        userNickname: _this.registerForm.userNickname,
+                        userPassword: _this.registerForm.userPassword,
+                        termInitialDate: _this.registerForm.termInitialDate
+                    })
+                    .then(function (response) {
+                        if (response.data.code === 10011) {
+                            _this.msgReminder("注册成功，将跳转登录", "success");
+                            _window.setTimeout("_window.location.href = './Login.html';", 1500);
+                        } else if (response.data.code === 10010) {
+                            _this.msgReminder("注册失败", "warning");
+                        } else {
+                            _this.msgReminder("系统错误", "danger");
+                        }
+                    });
+                },
+                getTodayDate() {
+                    let now = this.todayDate;
+                    let year = now.getFullYear();
+                    let month = now.getMonth();
+                    let date = now.getDate();
+                    month = month + 1;
+                    month = month.toString().padStart(2, "0");
+                    date = date.toString().padStart(2, "0");
+                    this.showTodayDate = `${year}-${month}-${date}`;
+                },
+            },
+        });
+        app.getTodayDate();
+    </script>
+</body>
+
+<style>
+    .el-header, .el-footer {
+        background-color: #B3C0D1;
+        color: #333;
+        text-align: center;
+        line-height: 60px;
+    }
+    .el-main {
+        background-color: #E9EEF3;
+        color: #333;
+        text-align: center;
+        line-height: 160px;
+    }
+</style>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="https://cdn.feczine.cn/library/axios/axios.min.js"></script>
+    <script src="https://cdn.feczine.cn/library/vue/vue2/vue.js"></script>
+    <link rel="stylesheet" href="https://cdn.feczine.cn/library/element-ui/index.css">
+    <script src="https://cdn.feczine.cn/library/element-ui/index.js"></script>
+</head>
+<body>
+    <div id="app">
+        <el-container>
+            <el-header>用户登录</el-header>
+            <el-main>
+                <el-form :model="loginForm" :rules="rules" ref="loginForm" label-width="100px">
+                    <el-form-item label="学号" prop="userCode">
+                        <el-input v-model="loginForm.userCode"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码" prop="userPassword">
+                        <el-input v-model="loginForm.userPassword"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button @click="_window.location.href = './Register.html';">注册</el-button>
+                        <el-button type="primary" @click="submitLoginForm()">登录</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-main>
+          </el-container>
+    </div>
+
+    <script>
+        const _window = window;
+        const app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    loginForm: {
+                        userCode: null,
+                        userPassword: null
+                    },
+                    rules: {
+                        userCode: [
+                            { type: 'string', required: true, message: '请输入学号', trigger: 'change' }
+                        ],
+                        userPassword: [
+                            { type: 'string', required: true, message: '请输入密码', trigger: 'change' }
+                        ]
+                    },
+                }
+            },
+            methods: {
+                msgReminder(msg, type) {
+                    this.$message({
+                        message: msg,
+                        type: type
+                    });
+                },
+                submitLoginForm() {
+                    let _this = this;
+                    axios.post('/users/login', {
+                        userCode: _this.loginForm.userCode,
+                        userPassword: _this.loginForm.userPassword
+                    })
+                    .then(function (response) {
+                        if (response.data.code === 10061) {
+                            _this.msgReminder("登陆成功", "success");
+                            _window.setTimeout("_window.location.href = './CourseSchedule.html';", 1500);
+                        } else if (response.data.code === 10060) {
+                            _this.msgReminder("登陆失败", "warning");
+                        } else {
+                            _this.msgReminder("系统错误", "danger");
+                        }
+                    });
+                }
+            },
+        });
+    </script>
+</body>
+
+<style>
+    .el-header, .el-footer {
+        background-color: #B3C0D1;
+        color: #333;
+        text-align: center;
+        line-height: 60px;
+    }
+    .el-main {
+        background-color: #E9EEF3;
+        color: #333;
+        text-align: center;
+        line-height: 160px;
+    }
+    .el-dropdown {
+        vertical-align: top;
+    }
+    .el-dropdown + .el-dropdown {
+        margin-left: 15px;
+    }
+    .el-icon-arrow-down {
+        font-size: 12px;
+    }
+</style>
+</html>

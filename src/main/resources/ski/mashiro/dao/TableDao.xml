@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ski.mashiro.dao.TableDao">
+    <update id="createTable">
+        create table if not exists ${tableName}
+        (
+            course_name varchar(10) NOT NULL,
+            course_location varchar(15) NOT NULL,
+            course_lecturer varchar(10) NOT NULL,
+            course_date json NOT NULL,
+            course_week varchar(5) NOT NULL,
+            primary key (course_name)
+        );
+    </update>
+    <delete id="deleteTable">
+        drop table ${tableName};
+    </delete>
+</mapper>

@@ -13,6 +13,6 @@ public class User {
     private String userPassword;
     private String userNickname;
     private Date termInitialDate;
-    private Date currentDate;
     private String currentWeek;
+    private String userTableName;
 }
