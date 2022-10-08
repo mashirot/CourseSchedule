@@ -18,9 +18,11 @@ public class LoginInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
         Cookie[] cookies = request.getCookies();
         String userCode = null;
-        for (Cookie cookie : cookies) {
-            if (USER_CODE.equals(cookie.getName())) {
-                userCode = cookie.getValue();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (USER_CODE.equals(cookie.getName())) {
+                    userCode = cookie.getValue();
+                }
             }
         }
         String[] uris = {"/Login.html", "/Register.html", "/users/register", "/users/login"};

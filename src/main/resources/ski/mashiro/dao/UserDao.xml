@@ -18,9 +18,9 @@
     <update id="updateUser">
         update user
         <set>
-            <if test="user.userPassword != null">user_password = #{user.userPassword}</if>
-            <if test="user.userNickname != null">user_nickname = #{user.userNickname}</if>
-            <if test="user.termInitialDate != null">user_term_initial_date = #{user.termInitialDate}</if>
+            <if test="user.userPassword != null">user_password = #{user.userPassword},</if>
+            <if test="user.userNickname != null">user_nickname = #{user.userNickname},</if>
+            <if test="user.termInitialDate != null">user_term_initial_date = #{user.termInitialDate},</if>
         </set>
         where user_code = #{user.userCode};
     </update>

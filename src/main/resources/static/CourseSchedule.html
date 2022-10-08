@@ -5,8 +5,8 @@
     <title>Schedule</title>
     <script src="https://cdn.feczine.cn/library/vue/vue2/vue.js"></script>
     <script src="https://cdn.feczine.cn/library/axios/axios.min.js"></script>
-    <script src="https://cdn.feczine.cn/library/element-ui/index.js"></script>
-    <link rel="stylesheet" href="https://cdn.feczine.cn/library/element-ui/index.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
 <body>
 <div id="app">
@@ -101,6 +101,50 @@
                 </el-dialog>
             </template>
             <template>
+                <el-button @click="getEffSchedule()" plain>有效课程</el-button>
+                <el-button @click="getSchedule()" plain>所有课程</el-button>
+            </template>
+            <template>
+                <el-button type="primary" plain @click="uploadDialogVisible = true">上传</el-button>
+
+                <el-dialog
+                    title="课程上传"
+                    :visible.sync="uploadDialogVisible"
+                    width="50%"
+                    :before-close="clearFileList">
+                    <div class="center">
+                        <el-upload
+                            ref="fileList"
+                            drag
+                            action="./file/update"
+                            accept=".txt"
+                            :file-list="fileList"
+                            :limit="1"
+                            :on-exceed="handleExceed"
+                            :on-change="handleFileUploadChange"
+                            :on-success="afterFileUpload"
+                            :before-upload="beforeFileUpload"
+                            :before-remove="beforeRemove"
+                            :auto-upload="false"
+                            multiple>
+                            <i class="el-icon-upload"></i>
+                            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                            <div class="el-upload__tip" slot="tip">只能上传txt文件 且不超过500kb</div>
+                            <div class="el-upload__tip" slot="tip">格式：#课程名|上课地点|授课老师|上课日期|上课周数，上课日期若有多个 请用英文逗号分隔</div>
+                            <div class="el-upload__tip" slot="tip">例：#高等数学|A教404|汤家凤|Monday 12:30-14:00,Friday 08:10-09:40</div>
+                        </el-upload>
+                    </div>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button @click="clearFileList()">取 消</el-button>
+                        <el-button type="primary" @click="submitUpload()">上 传</el-button>
+                    </span>
+                </el-dialog>
+            </template>
+            </template>
+            <template>
+                <el-button plain>当前：第 {{ currentWeek }} 周</el-button>
+            </template>
+            <template>
 
                 <el-dropdown @command="profileFunctions">
                     <el-button>{{ userNickname }}<i class="el-icon-arrow-down el-icon--right" style="text-align: right;"></i></el-button>
@@ -118,7 +162,7 @@
                         </el-input>
                         </el-form-item>
                         <el-form-item label="密码" prop="userPassword">
-                            <el-input v-model="profileTable.userPassword" placeholder="留空则不修改" autocomplete="off"></el-input>
+                            <el-input type="password" v-model="profileTable.userPassword" placeholder="留空则不修改" autocomplete="off"></el-input>
                         </el-form-item>
                         <el-form-item label="昵称" prop="userNickname">
                             <el-input v-model="profileTable.userNickname" placeholder="留空则不修改" autocomplete="off"></el-input>
@@ -130,7 +174,6 @@
                                 placeholder="留空则不修改">
                             </el-date-picker>
                         </el-form-item>
-                        <p>修改日期请重新登陆</p>
                     </el-form>
                     <div slot="footer" class="dialog-footer">
                       <el-button @click="clearProfileTable()">取 消</el-button>
@@ -163,9 +206,6 @@
                 </el-dialog>
                   
             </template>
-            <template>
-                第 {{ currentWeek }} 周
-            </template>
         </el-header>
         <el-main>
             <el-table
@@ -186,6 +226,7 @@
 </div>
 <script>
     const _window = window;
+    const _location = location;
     const app = new Vue({
         el: "#app",
         data() {
@@ -226,16 +267,18 @@
                     userPassword: null
                 },
                 profileTable: {
-                    userCode: null,
+                    userCode: getCookie("userCode"),
                     userNickname: null,
                     termInitialDate: null
                 },
+                fileList:[],
                 submitDialogVisible: false,
                 ModifyUserDialogVisible: false,
                 deleteCourseDialogVisible: false,
                 verifyDeleteUserDialogVisible: false,
                 ensureDeleteUserDialogVisible: false,
                 exitUserDialogVisible: false,
+                uploadDialogVisible: false,
                 tableData: [],
                 date: null,
                 dates: [
@@ -481,7 +524,7 @@
                 });
             },
             ensureDel() {
-                this.$confirm('此操作将永久删除课程, 是否继续？', '提示', {
+                this.$confirm('此操作将永久删除所有包含该名字的课程, 是否继续？', '提示', {
                 confirmButtonText: '删除',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -534,6 +577,7 @@
                     if (response.data.code === 10031) {
                         _this.msgReminder("修改成功", "success");
                         _this.clearProfileTable();
+                        _window.setTimeout("_location.reload();", 1000);
                     } else if (response.data.code === 10030) {
                         _this.msgReminder("修改失败", "warning");
                         _this.clearProfileTable();
@@ -614,6 +658,46 @@
                     }
                 });
             },
+            clearFileList() {
+                this.uploadDialogVisible = false;
+                this.fileList = [];
+            },
+            submitUpload() {
+                this.$refs.fileList.submit();
+            },
+            afterFileUpload(response, file, fileList) {
+                const _this = this;
+                console.log(response);
+                console.log(response.code);
+                if (response.code === 40011) {
+                    _this.msgReminder("解析成功", "success");
+                    _this.clearFileList();
+                    _window.setTimeout("_location.reload();", 1000);
+                } else if (response.code === 40010) {
+                    _this.msgReminder("解析失败，请检查文件格式，或课程名重复", "warning");
+                    _this.clearFileList();
+                } else {
+                    _this.msgReminder("系统错误", "danger");
+                    _this.clearFileList();
+                }
+            },
+            handleExceed(files, fileList) {
+                this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            beforeRemove(file, fileList) {
+                return this.$confirm(`确定移除 ${ file.name }？`);
+            },
+            handleFileUploadChange(file, fileList) {
+                this.fileList[0] = file;
+            },
+            beforeFileUpload(file) {
+                const _this = this;
+                if (file.size > (1024 * 512)) {
+                    this.$message.error('上传图片大小不能超过 512K!');
+                    return false;
+                }
+                return;
+            },
         },
     });
     app.getEffSchedule();
@@ -638,6 +722,9 @@
     color: #333;
     text-align: center;
     line-height: 20px;
+  }
+  .center{
+    text-align:center;
   }
 </style>
 </body>

@@ -5,8 +5,8 @@
     <title>Register</title>
     <script src="https://cdn.feczine.cn/library/axios/axios.min.js"></script>
     <script src="https://cdn.feczine.cn/library/vue/vue2/vue.js"></script>
-    <link rel="stylesheet" href="https://cdn.feczine.cn/library/element-ui/index.css">
-    <script src="https://cdn.feczine.cn/library/element-ui/index.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
 <body>
     <div id="app">
@@ -17,7 +17,7 @@
                         <el-form-item label="学号" prop="userCode">
                             <el-input v-model="registerForm.userCode"></el-input>
                         </el-form-item>
-                        <el-form-item label="密码" prop="userPassword">
+                        <el-form-item type="password" label="密码" prop="userPassword">
                             <el-input v-model="registerForm.userPassword"></el-input>
                         </el-form-item>
                         </el-form-item>

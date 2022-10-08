@@ -14,7 +14,7 @@
     <insert id="saveCourse">
         insert into ${tableName} (course_name, course_location, course_lecturer, course_date, course_week)
         select #{course.courseName}, #{course.courseLocation}, #{course.courseLecturer}, #{course.courseDate}, #{course.courseWeek}
-        where not exists (select course_name from courses where course_name = #{course.courseName});
+        where not exists (select course_name from ${tableName} where course_name = #{course.courseName});
     </insert>
     <update id="updateCourse">
         update

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 import ski.mashiro.dao.CourseDao;
 import ski.mashiro.pojo.Code;
 import ski.mashiro.pojo.Course;
@@ -45,6 +46,23 @@ public class CourseServiceImpl implements CourseService {
             return new Result(Code.SAVE_COURSE_FAILED, null);
         }
         return new Result(courseDao.saveCourse(course, tableName) != 0 ? Code.SAVE_COURSE_SUCCESS : Code.SAVE_COURSE_FAILED, null);
+    }
+
+    @Override
+    public Result saveCoursesFromFile(MultipartFile multipartFile, String tableName) {
+        List<Course> courses = Utils.analyzeScheduleFile(multipartFile);
+        if (courses == null) {
+            return new Result(Code.FILE_ANALYZE_FAILED, null);
+        }
+        try {
+            for (Course course : courses) {
+                course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
+                courseDao.saveCourse(course, tableName);
+            }
+        } catch (Exception e) {
+            return new Result(Code.FILE_ANALYZE_FAILED, null);
+        }
+        return new Result(Code.FILE_ANALYZE_SUCCESS, null);
     }
 
     @Override

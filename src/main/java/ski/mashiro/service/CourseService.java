@@ -1,5 +1,6 @@
 package ski.mashiro.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import ski.mashiro.pojo.Course;
 import ski.mashiro.pojo.Result;
 
@@ -15,6 +16,14 @@ public interface CourseService {
      * @return 结果
      */
     Result saveCourse(Course course, String tableName);
+
+    /**
+     * 从文件获取课程列
+     * @param multipartFile 文件
+     * @param tableName 表名
+     * @return 结果
+     */
+    Result saveCoursesFromFile(MultipartFile multipartFile, String tableName);
 
     /**
      * 删除课程

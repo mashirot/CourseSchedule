@@ -39,4 +39,7 @@ public class Code {
 
     public static final Integer USER_LOGOUT_SUCCESS = 30011;
     public static final Integer USER_LOGOUT_FAILED = 30010;
+
+    public static final Integer FILE_ANALYZE_SUCCESS = 40011;
+    public static final Integer FILE_ANALYZE_FAILED = 40010;
 }
