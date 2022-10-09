@@ -158,6 +158,11 @@ public class UserController {
         initDate.setPath("/");
         currentWeek.setPath("/");
         userTableName.setPath("/");
+        userCodeCookie.setMaxAge(7 * 24 * 60 * 60 * 1000);
+        userNickname.setMaxAge(7 * 24 * 60 * 60 * 1000);
+        initDate.setMaxAge(7 * 24 * 60 * 60 * 1000);
+        currentWeek.setMaxAge(7 * 24 * 60 * 60 * 1000);
+        userTableName.setMaxAge(7 * 24 * 60 * 60 * 1000);
         response.addCookie(userCodeCookie);
         response.addCookie(userNickname);
         response.addCookie(initDate);

@@ -3,7 +3,6 @@ package ski.mashiro;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import ski.mashiro.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +22,8 @@ public class TestSomething {
     }
 
     @Test
-    void testDate() {
-        System.out.println(Utils.transitionTableName("123"));
-        System.out.println(Utils.transitionTableName("321"));
+    void testSomething() throws Exception {
+        String[] strings = {"09:50-11:40", "14:00-15:30"};
+        System.out.println(objectMapper.writeValueAsString(strings));
     }
 }

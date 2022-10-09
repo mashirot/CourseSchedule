@@ -5,6 +5,7 @@
     <title>Register</title>
     <script src="https://cdn.feczine.cn/library/axios/axios.min.js"></script>
     <script src="https://cdn.feczine.cn/library/vue/vue2/vue.js"></script>
+    <script src="https://cdn.feczine.cn/library/js/sha1.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
@@ -17,8 +18,8 @@
                         <el-form-item label="学号" prop="userCode">
                             <el-input v-model="registerForm.userCode"></el-input>
                         </el-form-item>
-                        <el-form-item type="password" label="密码" prop="userPassword">
-                            <el-input v-model="registerForm.userPassword"></el-input>
+                        <el-form-item label="密码" prop="userPassword">
+                            <el-input type="password" v-model="registerForm.userPassword"></el-input>
                         </el-form-item>
                         </el-form-item>
                         <el-form-item label="昵称" prop="userNickname">
@@ -46,6 +47,7 @@
 
     <script>
         const _window = window;
+        const _that = this;
         const app = new Vue({
             el: '#app',
             data() {
@@ -108,12 +110,12 @@
                     }
                     axios.post('/users/register', {
                         userCode: _this.registerForm.userCode,
-                        userPassword: _this.registerForm.userPassword,
+                        userPassword: _that.sha1(_this.registerForm.userPassword),
                         userNickname: _this.registerForm.userNickname,
-                        userPassword: _this.registerForm.userPassword,
                         termInitialDate: _this.registerForm.termInitialDate
                     })
                     .then(function (response) {
+                        console.log(response);
                         if (response.data.code === 10011) {
                             _this.msgReminder("注册成功，将跳转登录", "success");
                             _window.setTimeout("_window.location.href = './Login.html';", 1500);

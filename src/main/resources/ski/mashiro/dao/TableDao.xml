@@ -10,7 +10,7 @@
             course_location varchar(15) NOT NULL,
             course_lecturer varchar(10) NOT NULL,
             course_date json NOT NULL,
-            course_week varchar(5) NOT NULL,
+            course_week json NOT NULL,
             primary key (course_name)
         );
     </update>

@@ -59,6 +59,6 @@ public class TestCourseService {
 
     @Test
     void testListAllCourses() {
-        System.out.println(courseService.listAllCourses(""));
+        System.out.println(courseService.listAllCourses("tb_123321"));
     }
 }

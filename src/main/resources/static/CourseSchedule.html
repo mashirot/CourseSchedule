@@ -5,6 +5,7 @@
     <title>Schedule</title>
     <script src="https://cdn.feczine.cn/library/vue/vue2/vue.js"></script>
     <script src="https://cdn.feczine.cn/library/axios/axios.min.js"></script>
+    <script src="https://cdn.feczine.cn/library/js/sha1.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
@@ -34,10 +35,6 @@
                         </el-form-item>
                         <el-form-item label="授课老师" prop="courseLecturer">
                         <el-input v-model="form.courseLecturer"></el-input>
-                        </el-form-item>
-                        <el-form-item label="上课周数" prop="courseWeek">
-                        <el-input v-model="form.courseWeek"></el-input>
-                        </el-form-item>
                         <el-form-item label="上课时间" required v-for="(item, index) in form.nums" :key="index">
                             <el-form :inline="true" ref="form" :model="form" :rules="rules">
                                 <el-form-item prop="courseDate">
@@ -74,6 +71,9 @@
                                             minTime: form.courseStartTime[index]
                                         }">
                                     </el-time-select>
+                                </el-form-item>
+                                <el-form-item prop="courseWeek">
+                                    <el-input placeholder="上课周数" v-model="form.courseWeek[index]"></el-input>
                                 </el-form-item>
                                 <el-button v-if="index === 0" type="primary" plain @click="submitAddDate()">增加</el-button>
                                 <el-button v-if="index > 0 && index + 1 === form.nums.length" type="danger" plain @click="submitDeleteDate()">删除</el-button>
@@ -216,7 +216,7 @@
                 style="width: 100%">
                 <el-table-column prop="courseShowDate" label="日期" sortable :sort-method="compare"></el-table-column>
                 <el-table-column prop="courseShowTime" label="时间"></el-table-column>
-                <el-table-column prop="courseWeek" label="周数"></el-table-column>
+                <el-table-column prop="courseShowWeek" label="周数"></el-table-column>
                 <el-table-column prop="courseName" label="课程名"></el-table-column>
                 <el-table-column prop="courseLocation" label="上课地点"></el-table-column>
                 <el-table-column prop="courseLecturer" label="授课老师"></el-table-column>
@@ -227,6 +227,7 @@
 <script>
     const _window = window;
     const _location = location;
+    const _that = this;
     const app = new Vue({
         el: "#app",
         data() {
@@ -246,6 +247,25 @@
                     callback(new Error("请选择结束时间"));
                 }
             };
+            let checkWeek = (rule, value, callback) => {
+                for (let i = 0; i < value.length; i++) {
+                    week = value[i].split("-");
+                    if (value[i] == null || value[i] == '') {
+                        callback(new Error("请输入上课周数"));
+                    }
+                    if (!(value[i].match(/\d{1,2}-\d{1,2}/))) {
+                        callback(new Error("请输入正确的格式 [xx]-[xx]"));
+                    }
+                    if (value[i].match(/\d{1,2}-\d{1,2}/)) {
+                        if (Number(week[1]) > 99 || Number(week[1]) > 99) {
+                            callback(new Error("请输入正确的格式 [xx]-[xx]"));                  
+                        }
+                    }
+                    if (Number(week[0]) > Number(week[1])) {
+                        callback(new Error("小周在前，大周在后"));
+                    }
+                }
+            };
             return {
                 userNickname: getCookie("userNickname"),
                 currentWeek: getCookie("currentWeek"),
@@ -253,7 +273,7 @@
                     courseName: null,
                     courseLocation: null,
                     courseLecturer: null,
-                    courseWeek: null,
+                    courseWeek: [],
                     nums: [""],
                     courseDate: [],
                     courseStartTime: [],
@@ -319,25 +339,7 @@
                         { type: 'string', required: true, message: '请输入授课老师', trigger: 'change' }
                     ],
                     courseWeek: [
-                        { type: 'string', required: true, message: '请输入上课周数', trigger: 'change' },
-                        { pattern: /\d{1,2}-\d{1,2}/, message: '请输入正确的格式 [xx]-[xx]', trigger: 'change' },
-                        { 
-                            type: 'string',
-                            message: '小周在前，大周在后',
-                            trigger: 'change',
-                            transform(value) {
-                                if(value !== null && value !== '') {
-                                    week = value.split("-");
-                                    if (Number(week[0]) <= Number(week[1])) {
-                                        return value;
-                                    } else {
-                                        return false;
-                                    }
-                                }else {
-                                    return null;
-                                }
-                            }
-                        },
+                        { required: true, validator: checkWeek, trigger: 'blur' }
                     ],
                     courseDate: [
                         { required: true, validator: checkDate, trigger: 'blur' }
@@ -436,6 +438,7 @@
                 this.form.courseName = null;
                 this.form.courseLocation = null;
                 this.form.courseLecturer = null;
+                this.form.courseWeek = [];
                 this.form.nums = [""];
                 this.form.courseDate = [];
                 this.form.courseStartTime = [];
@@ -569,7 +572,7 @@
                 let _this = this;
                 axios.put('/users', {
                     userCode: getCookie("userCode"),
-                    userPassword: _this.profileTable.userPassword,
+                    userPassword: _that.sha1(_this.profileTable.userPassword),
                     userNickname: _this.profileTable.userNickname,
                     termInitialDate: _this.profileTable.termInitialDate
                 })
@@ -609,7 +612,7 @@
                 }
                 axios.post('/users/login', {
                     userCode: _this.verifyUser.userCode,
-                    userPassword: _this.verifyUser.userPassword
+                    userPassword: _that.sha1(_this.verifyUser.userPassword)
                 })
                 .then(function (response) {
                     if (response.data.code === 10061) {

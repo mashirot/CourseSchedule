@@ -9,17 +9,17 @@
             <result property="courseLocation" column="course_location" jdbcType="VARCHAR"/>
             <result property="courseLecturer" column="course_lecturer" jdbcType="VARCHAR"/>
             <result property="courseDate" column="course_date" jdbcType="OTHER"/>
-            <result property="courseWeek" column="course_week" jdbcType="VARCHAR"/>
+            <result property="jsonCourseWeek" column="course_week" jdbcType="OTHER"/>
     </resultMap>
     <insert id="saveCourse">
         insert into ${tableName} (course_name, course_location, course_lecturer, course_date, course_week)
-        select #{course.courseName}, #{course.courseLocation}, #{course.courseLecturer}, #{course.courseDate}, #{course.courseWeek}
+        select #{course.courseName}, #{course.courseLocation}, #{course.courseLecturer}, #{course.courseDate}, #{course.jsonCourseWeek}
         where not exists (select course_name from ${tableName} where course_name = #{course.courseName});
     </insert>
     <update id="updateCourse">
         update
         ${tableName} set
-        course_name = #{course.courseName}, course_location = #{course.courseLocation}, course_lecturer = #{course.courseLecturer}, course_date = #{course.courseDate}, course_week = #{course.courseWeek}
+        course_name = #{course.courseName}, course_location = #{course.courseLocation}, course_lecturer = #{course.courseLecturer}, course_date = #{course.courseDate}, course_week = #{course.jsonCourseWeek}
         where course_name = #{course.courseName};
     </update>
     <delete id="deleteByCourseName">

@@ -5,14 +5,15 @@
 <mapper namespace="ski.mashiro.dao.UserDao">
     <resultMap id="UserResultMap" type="ski.mashiro.pojo.User">
         <result property="userCode" column="user_code" jdbcType="VARCHAR"/>
-        <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
+        <result property="userPassword" column="user_password" jdbcType="CHAR"/>
+        <result property="passwordSalt" column="password_salt" jdbcType="CHAR"/>
         <result property="userNickname" column="user_nickname" jdbcType="VARCHAR"/>
         <result property="termInitialDate" column="user_term_initial_date" jdbcType="DATE"/>
         <result property="userTableName" column="user_table_name" jdbcType="VARCHAR"/>
     </resultMap>
     <insert id="saveUser">
-        insert into user (user_code, user_password, user_nickname, user_term_initial_date, user_table_name)
-        select #{user.userCode}, #{user.userPassword}, #{user.userNickname}, #{user.termInitialDate}, #{user.userTableName}
+        insert into user (user_code, user_password, password_salt, user_nickname, user_term_initial_date, user_table_name)
+        select #{user.userCode}, #{user.userPassword}, #{user.passwordSalt}, #{user.userNickname}, #{user.termInitialDate}, #{user.userTableName}
         where not exists (select #{user.userCode} from user where user_code = #{user.userCode});
     </insert>
     <update id="updateUser">
@@ -36,5 +37,10 @@
     <select id="getInitDate" resultType="java.util.Date">
         select user_term_initial_date
         from user where user_code = #{userCode};
+    </select>
+    <select id="getPasswordSalt" resultType="java.lang.String">
+        select password_salt
+        from user
+        where user_code = #{userCode};
     </select>
 </mapper>

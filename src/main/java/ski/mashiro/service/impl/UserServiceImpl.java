@@ -8,6 +8,7 @@ import ski.mashiro.pojo.Code;
 import ski.mashiro.pojo.Result;
 import ski.mashiro.pojo.User;
 import ski.mashiro.service.UserService;
+import ski.mashiro.util.Encrypt;
 import ski.mashiro.util.Utils;
 
 import java.util.Date;
@@ -30,8 +31,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result saveUser(User user) {
         user.setUserTableName(Utils.transitionTableName(user.getUserCode()));
-        int rs = userDao.saveUser(user);
-        if (rs == 1) {
+        user.setPasswordSalt(Encrypt.generateSalt(50));
+        user.setUserPassword(Encrypt.encryptPassword(user.getUserPassword(), user.getPasswordSalt()));
+        if (userDao.saveUser(user) == 1) {
             tableDao.createTable(user.getUserTableName());
             return new Result(Code.SAVE_USER_SUCCESS, null);
         }
@@ -50,6 +52,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result updateUser(User user) {
+        if (user.getUserPassword() != null) {
+            user.setUserPassword(Encrypt.encryptPassword(user.getUserPassword(), userDao.getPasswordSalt(user.getUserCode())));
+        }
         return new Result(userDao.updateUser(user) == 1 ? Code.UPDATE_USER_SUCCESS : Code.UPDATE_USER_FAILED, null);
     }
 
@@ -61,7 +66,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result getUser(String userCode, String userPasswd) {
-        User user = userDao.getUser(userCode, userPasswd);
+        String password = Encrypt.encryptPassword(userPasswd, userDao.getPasswordSalt(userCode));
+        User user = userDao.getUser(userCode, password);
         if (user != null) {
             user.setCurrentWeek(Utils.calcCurrentWeek(new Date(), user.getTermInitialDate()));
             return new Result(Code.GET_USER_SUCCESS, user);

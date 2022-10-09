@@ -16,6 +16,8 @@ import java.util.*;
  */
 public class Utils {
 
+
+
     public static String transitionTableName(String userCode) {
         return "tb_" + userCode;
     }
@@ -56,8 +58,7 @@ public class Utils {
                     map.put(details[0], details[1]);
                 }
                 course.setCourseNormalDate(map);
-                course.setCourseWeek(items[4]);
-
+                course.setCourseWeek(items[4].split(","));
                 courseList.add(course);
             }
             return courseList;
