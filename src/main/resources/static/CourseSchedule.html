@@ -151,6 +151,7 @@
                     <el-button>{{ userNickname }}<i class="el-icon-arrow-down el-icon--right" style="text-align: right;"></i></el-button>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item command="modifyProfile">修改信息</el-dropdown-item>
+                        <el-dropdown-item command="apiTokenDialog">获取Api</el-dropdown-item>
                         <el-dropdown-item command="delUser">注销</el-dropdown-item>
                         <el-dropdown-item command="exit">退出</el-dropdown-item>
                     </el-dropdown-menu>
@@ -182,17 +183,27 @@
                     </div>
                 </el-dialog>
 
+                <el-dialog
+                title="ApiToken"
+                :visible.sync="apiTokenDialogVisible"
+                width="30%">
+                <span style="text-align: middle">Token: {{ apiToken }}</span>
+                <span slot="footer" class="dialog-footer">
+                    <el-button type="warning" @click="apiTokenDialogVisible = false; apiToken = null;">关 闭</el-button>
+                </span>
+                </el-dialog>
+
                 <el-dialog title="注销验证" :visible.sync="verifyDeleteUserDialogVisible" :before-close="clearVerifyUserForm">
                     <el-form :model="verifyUser" :rules="verifyRules">
                       <el-form-item label="学号" prop="userCode">{{ verifyUser.userCode }}</el-input>
                       </el-form-item>
                       <el-form-item label="密码" prop="userPassword">
-                        <el-input v-model="verifyUser.userPassword" autocomplete="off"></el-input>
+                        <el-input type="password" v-model="verifyUser.userPassword" autocomplete="off"></el-input>
                       </el-form-item>
                     </el-form>
                     <div slot="footer" class="dialog-footer">
                       <el-button @click="clearVerifyUserForm()">取 消</el-button>
-                      <el-button type="primary" @click="submitVerifyUser(ensureDeleteUserDialogVisible)">验 证</el-button>
+                      <el-button type="primary" @click="submitVerifyUser()">验 证</el-button>
                     </div>
                 </el-dialog>
 
@@ -293,8 +304,10 @@
                     termInitialDate: null
                 },
                 fileList:[],
+                apiToken: null,
                 submitDialogVisible: false,
                 ModifyUserDialogVisible: false,
+                apiTokenDialogVisible: false,
                 deleteCourseDialogVisible: false,
                 verifyDeleteUserDialogVisible: false,
                 ensureDeleteUserDialogVisible: false,
@@ -563,6 +576,7 @@
             },
             profileFunctions(cmd) {
                 if (cmd === "modifyProfile") this.modifyProfile();
+                if (cmd === "apiTokenDialog") this.apiTokenDialog();
                 if (cmd === "exit") this.exit();
                 if (cmd === "delUser") this.delUser();
             },
@@ -598,6 +612,22 @@
                 this.profileTable.termInitialDate = null;
                 this.profileTable.currentWeek = null;
             },
+            apiTokenDialog() {
+                this.apiTokenDialogVisible = true;
+            },
+            getApiToken() {
+                let _this = this;
+                axios.get('/users/apiToken')
+                .then(function (response) {
+                    if (response.data.code === 50021) {
+                        _this.apiToken = response.data.data
+                    } else if (response.data.code === 50020) {
+                        _this.msgReminder("获取失败", "warning");
+                    } else {
+                        _this.msgReminder("系统错误", "danger");
+                    }
+                });
+            },
             delUser() {
                 this.verifyDeleteUserDialogVisible = true;
             },
@@ -618,7 +648,7 @@
                 .then(function (response) {
                     if (response.data.code === 10061) {
                         _this.clearVerifyUserForm();
-                        _this.verifyDeleteUserDialogVisible = true;
+                        _this.ensureDeleteUserDialogVisible = true;
                     } else if (response.data.code === 10060) {
                         _this.msgReminder("验证失败", "warning");
                         _this.clearVerifyUserForm();

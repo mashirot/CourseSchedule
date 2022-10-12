@@ -2,7 +2,6 @@ package ski.mashiro.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.MapType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 import ski.mashiro.dao.CourseDao;
@@ -156,7 +155,7 @@ public class CourseServiceImpl implements CourseService {
                     String[] dates = course.getCourseDate().split(",");
                     for (String date : dates) {
                         String[] s = date.split(" ");
-                        Course c = new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index]);
+                        Course c = new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index++]);
                         courseList.add(c);
                     }
                 } else {
@@ -182,7 +181,11 @@ public class CourseServiceImpl implements CourseService {
                     String[] dates = course.getCourseDate().split(",");
                     for (String date : dates) {
                         String[] s = date.split(" ");
-                        if (!s[0].equals(courseDate) || !isCourseEffect(initDate, weeks[index])) {
+                        if (!s[0].equals(courseDate)) {
+                            continue;
+                        }
+                        if (!isCourseEffect(initDate, weeks[index])) {
+                            index++;
                             continue;
                         }
                         courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index++]));
@@ -211,6 +214,7 @@ public class CourseServiceImpl implements CourseService {
                     for (String date : dates) {
                         String[] s = date.split(" ");
                         if (!isCourseEffect(initDate, weeks[index])) {
+                            index++;
                             continue;
                         }
                         courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index++]));

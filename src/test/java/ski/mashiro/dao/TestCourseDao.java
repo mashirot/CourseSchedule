@@ -25,8 +25,6 @@ public class TestCourseDao {
         Map<String, String> map = new HashMap<>();
         map.put("Sunday", "10:00-11:30");
         map.put("Monday", "14:00-15:30");
-        course.setCourseNormalDate(map);
-        course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
         System.out.println((courseDao.saveCourse(course, "") != 0));
     }
 

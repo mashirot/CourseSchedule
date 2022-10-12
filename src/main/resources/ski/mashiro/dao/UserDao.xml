@@ -44,7 +44,7 @@
         from user
         where user_code = #{userCode};
     </select>
-    <select id="getUserByApiToken" resultType="ski.mashiro.pojo.User">
+    <select id="getUserByApiToken" resultMap="UserResultMap">
         select user_code, user_term_initial_date, user_table_name
         from user
         where user_code = #{user.userCode} and user_api_token = #{user.userApiToken};

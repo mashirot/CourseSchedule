@@ -50,31 +50,31 @@ public class UserController {
         }
         Cookie[] cookies = request.getCookies();
 
-        String CookieUserTableName = null;
-        String CookieUserNickname = null;
-        String CookieInitDate = null;
-        String CookieCurrentWeek = null;
+        String cookieUserTableName = null;
+        String cookieUserNickname = null;
+        String cookieInitDate = null;
+        String cookieCurrentWeek = null;
 
         for (Cookie cookie : cookies) {
             if ("userTableName".equals(cookie.getName())) {
-                CookieUserTableName = cookie.getValue();
+                cookieUserTableName = cookie.getValue();
                 continue;
             }
             if ("userNickname".equals(cookie.getName())) {
-                CookieUserNickname = cookie.getValue();
+                cookieUserNickname = cookie.getValue();
                 continue;
             }
             if ("initDate".equals(cookie.getName())) {
-                CookieInitDate = cookie.getValue();
+                cookieInitDate = cookie.getValue();
                 continue;
             }
             if ("currentWeek".equals(cookie.getName())) {
-                CookieCurrentWeek = cookie.getValue();
+                cookieCurrentWeek = cookie.getValue();
             }
         }
 
         Cookie userCode = new Cookie("userCode", user.getUserCode());
-        Cookie userTableName = new Cookie("userTableName", CookieUserTableName);
+        Cookie userTableName = new Cookie("userTableName", cookieUserTableName);
         userCode.setPath("/");
         userTableName.setPath("/");
         response.addCookie(userCode);
@@ -84,7 +84,7 @@ public class UserController {
             userNickname.setPath("/");
             response.addCookie(userNickname);
         } else {
-            Cookie userNickname = new Cookie("userNickname", CookieUserNickname);
+            Cookie userNickname = new Cookie("userNickname", cookieUserNickname);
             userNickname.setPath("/");
             response.addCookie(userNickname);
         }
@@ -96,10 +96,10 @@ public class UserController {
             response.addCookie(initDate);
             response.addCookie(currentWeek);
         } else {
-            Cookie initDate = new Cookie("initDate", CookieInitDate);
+            Cookie initDate = new Cookie("initDate", cookieInitDate);
             initDate.setPath("/");
             response.addCookie(initDate);
-            Cookie currentWeek = new Cookie("currentWeek", CookieCurrentWeek);
+            Cookie currentWeek = new Cookie("currentWeek", cookieCurrentWeek);
             currentWeek.setPath("/");
             response.addCookie(currentWeek);
         }
@@ -135,6 +135,11 @@ public class UserController {
     public Result logout(HttpServletRequest request, HttpServletResponse response) {
         resetCookie(request, response);
         return new Result(Code.USER_LOGOUT_SUCCESS, null);
+    }
+
+    @GetMapping("/apiToken")
+    public Result getApiToken(@CookieValue(value = "userCode")String userCode) {
+        return userService.getUserApiToken(userCode);
     }
 
     private static void resetCookie(HttpServletRequest request, HttpServletResponse response) {

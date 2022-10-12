@@ -26,8 +26,6 @@ public class TestCourseService {
         Map<String, String> map = new HashMap<>();
         map.put("Sunday", "10:00-11:30");
         map.put("Monday", "14:00-15:30");
-        course.setCourseNormalDate(map);
-        course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
         System.out.println((courseService.saveCourse(course, "")));
     }
 
@@ -49,7 +47,6 @@ public class TestCourseService {
     void testGetCourseByCourseName() {
         Result course = courseService.getCourseByCourseName("测试", "");
         Course data = (Course) course.getData();
-        System.out.println(data.getCourseNormalDate());
     }
 
     @Test
