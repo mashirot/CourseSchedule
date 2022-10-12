@@ -2,8 +2,6 @@ package ski.mashiro.pojo;
 
 import lombok.Data;
 
-import java.util.Map;
-
 /**
  * @author MashiroT
  * 2022-09-30 14:52:11
@@ -16,7 +14,6 @@ public class Course {
     private String[] courseWeek;
     private String jsonCourseWeek;
     private String courseDate;
-    private Map<String, String> courseNormalDate;
     private String courseShowDate;
     private String courseShowTime;
     private String courseShowWeek;

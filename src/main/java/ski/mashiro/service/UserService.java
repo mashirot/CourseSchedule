@@ -43,4 +43,18 @@ public interface UserService {
      * @return 结果
      */
     Result getUser(String userCode, String userPasswd);
+
+    /**
+     * 通过Api登录
+     * @param user 入参
+     * @return 结果
+     */
+    Result getUserByApiToken(User user);
+
+    /**
+     * 获取用户Api
+     * @param userCode 学号
+     * @return 结果
+     */
+    Result getUserApiToken(String userCode);
 }

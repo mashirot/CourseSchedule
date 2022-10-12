@@ -32,6 +32,20 @@ public class Utils {
         return sdf.parse(date);
     }
 
+    public static String getWeek() {
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        switch (dayOfWeek) {
+            case 1: return "Monday";
+            case 2: return "Tuesday";
+            case 3: return "Wednesday";
+            case 4: return "Thursday";
+            case 5: return "Friday";
+            case 6: return "Saturday";
+            case 7: return "Sunday";
+            default: return null;
+        }
+    }
+
     public static String calcCurrentWeek(Date currentDate, Date initDate) {
         return String.valueOf((currentDate.getTime() - initDate.getTime()) / (7 * 24 * 60 * 60 * 1000) + 1);
     }
@@ -52,12 +66,11 @@ public class Utils {
                 course.setCourseLocation(items[1]);
                 course.setCourseLecturer(items[2]);
                 String[] dates = items[3].split(",");
-                Map<String, String> map = new HashMap<>(dates.length);
+                StringBuilder sb = new StringBuilder();
                 for (String date : dates) {
-                    String[] details = date.split(" ");
-                    map.put(details[0], details[1]);
+                    sb.append(date).append(date.equals(dates[dates.length - 1]) ? "" : ",");
                 }
-                course.setCourseNormalDate(map);
+                course.setCourseDate(sb.toString());
                 course.setCourseWeek(items[4].split(","));
                 courseList.add(course);
             }

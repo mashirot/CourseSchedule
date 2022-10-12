@@ -25,10 +25,10 @@ public class LoginInterceptor implements HandlerInterceptor {
                 }
             }
         }
-        String[] uris = {"/Login.html", "/Register.html", "/users/register", "/users/login"};
+        String[] uris = {"/Login.html", "/Register.html", "/users/register", "/users/login", "/api"};
         boolean flag = true;
         for (String s : uris) {
-            if (s.equals(uri)) {
+            if (uri.contains(s)) {
                 flag = false;
                 break;
             }

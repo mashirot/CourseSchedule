@@ -42,4 +42,10 @@ public class Code {
 
     public static final Integer FILE_ANALYZE_SUCCESS = 40011;
     public static final Integer FILE_ANALYZE_FAILED = 40010;
+
+    public static final Integer API_LOGIN_SUCCESS = 50011;
+    public static final Integer API_LOGIN_FAILED = 50010;
+
+    public static final Integer API_GET_SUCCESS = 50021;
+    public static final Integer API_GET_FAILED = 50020;
 }

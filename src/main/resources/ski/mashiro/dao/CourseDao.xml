@@ -8,7 +8,7 @@
             <result property="courseName" column="course_name" jdbcType="VARCHAR"/>
             <result property="courseLocation" column="course_location" jdbcType="VARCHAR"/>
             <result property="courseLecturer" column="course_lecturer" jdbcType="VARCHAR"/>
-            <result property="courseDate" column="course_date" jdbcType="OTHER"/>
+            <result property="courseDate" column="course_date" jdbcType="VARCHAR"/>
             <result property="jsonCourseWeek" column="course_week" jdbcType="OTHER"/>
     </resultMap>
     <insert id="saveCourse">

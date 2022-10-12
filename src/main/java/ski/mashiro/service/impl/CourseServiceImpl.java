@@ -25,7 +25,6 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseDao courseDao;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final MapType mapType = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, String.class);
 
     @Autowired
     public CourseServiceImpl(CourseDao courseDao) {
@@ -35,13 +34,12 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Result saveCourse(Course course, String tableName) {
         try {
-            Map<String, String> map = new HashMap<>(course.getCourseInputDate().length);
+            StringBuilder date = new StringBuilder();
             for (String s : course.getCourseInputDate()) {
-                String[] rs = s.split(" ");
-                map.put(rs[0], rs[1]);
+                date.append(s);
+                date.append(s.equals(course.getCourseInputDate()[course.getCourseInputDate().length - 1]) ? "" : ",");
             }
-            course.setCourseNormalDate(map);
-            course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
+            course.setCourseDate(date.toString());
             course.setJsonCourseWeek(objectMapper.writeValueAsString(course.getCourseWeek()));
         } catch (JsonProcessingException e) {
             return new Result(Code.SAVE_COURSE_FAILED, null);
@@ -57,7 +55,6 @@ public class CourseServiceImpl implements CourseService {
         }
         try {
             for (Course course : courses) {
-                course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
                 course.setJsonCourseWeek(objectMapper.writeValueAsString(course.getCourseWeek()));
                 courseDao.saveCourse(course, tableName);
             }
@@ -75,7 +72,12 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Result updateCourse(Course course, String tableName) {
         try {
-            course.setCourseDate(objectMapper.writeValueAsString(course.getCourseNormalDate()));
+            StringBuilder sb = new StringBuilder();
+            for (String s : course.getCourseInputDate()) {
+                sb.append(s).append(s.equals(course.getCourseInputDate()[course.getCourseInputDate().length - 1]) ? "" : ",");
+            }
+            course.setCourseDate(sb.toString());
+            course.setJsonCourseWeek(objectMapper.writeValueAsString(course.getCourseWeek()));
         } catch (JsonProcessingException e) {
             return new Result(Code.UPDATE_COURSE_FAILED, null);
         }
@@ -85,12 +87,26 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Result getCourseByCourseName(String courseName, String tableName) {
         Course course = courseDao.getCourseByCourseName(courseName, tableName);
+        List<Course> courseList = new ArrayList<>(5);
         try {
-            course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
+            String[] weeks = objectMapper.readValue(course.getJsonCourseWeek(), String[].class);
+            int index = 0;
+            if (course.getCourseDate().contains(",")) {
+                String[] dates = course.getCourseDate().split(",");
+                for (String date : dates) {
+                    String[] s = date.split(" ");
+                    Course c = new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index++]);
+                    courseList.add(c);
+                }
+            } else {
+                String[] s = course.getCourseDate().split(" ");
+                courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index]));
+            }
+
         } catch (JsonProcessingException e) {
             return new Result(Code.GET_SINGLE_FAILED, null);
         }
-        return new Result(Code.GET_SINGLE_SUCCESS, course);
+        return new Result(Code.GET_SINGLE_SUCCESS, courseList);
     }
 
     @Override
@@ -99,14 +115,27 @@ public class CourseServiceImpl implements CourseService {
         List<Course> courseList = new ArrayList<>(list.size() * 2 + 1);
         for (Course course : list) {
             try {
-                course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
                 course.setCourseWeek(objectMapper.readValue(course.getJsonCourseWeek(), String[].class));
-                int index = 0;
-                for (Map.Entry<String, String> entry : course.getCourseNormalDate().entrySet()) {
-                    Course c = new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), entry.getKey(), entry.getValue(), course.getCourseWeek()[index++]);
-                    if (courseDate.equals(c.getCourseShowDate())) {
+                String[] weeks = objectMapper.readValue(course.getJsonCourseWeek(), String[].class);
+                if (course.getCourseDate().contains(",")) {
+                    String[] dates = course.getCourseDate().split(",");
+                    int index = 0;
+                    for (String date : dates) {
+                        String[] s = date.split(" ");
+                        if (!s[0].equals(courseDate)) {
+                            continue;
+                        }
+                        Course c = new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index++]);
                         courseList.add(c);
                     }
+                } else {
+                    int index = 0;
+                    String[] s = course.getCourseDate().split(" ");
+                    if (!s[0].equals(courseDate)) {
+                        continue;
+                    }
+                    Course c = new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index]);
+                    courseList.add(c);
                 }
             } catch (JsonProcessingException e) {
                 return new Result(Code.LIST_DATE_FAILED, null);
@@ -121,11 +150,18 @@ public class CourseServiceImpl implements CourseService {
         List<Course> courseList = new ArrayList<>(list.size() * 2 + 1);
         for (Course course : list) {
             try {
-                course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
-                course.setCourseWeek(objectMapper.readValue(course.getJsonCourseWeek(), String[].class));
                 int index = 0;
-                for (Map.Entry<String, String> entry : course.getCourseNormalDate().entrySet()) {
-                    courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), entry.getKey(), entry.getValue(), course.getCourseWeek()[index++]));
+                String[] weeks = objectMapper.readValue(course.getJsonCourseWeek(), String[].class);
+                if (course.getCourseDate().contains(",")) {
+                    String[] dates = course.getCourseDate().split(",");
+                    for (String date : dates) {
+                        String[] s = date.split(" ");
+                        Course c = new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index]);
+                        courseList.add(c);
+                    }
+                } else {
+                    String[] s = course.getCourseDate().split(" ");
+                    courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index]));
                 }
             } catch (Exception e) {
                 return new Result(Code.LIST_ALL_FAILED, null);
@@ -140,14 +176,20 @@ public class CourseServiceImpl implements CourseService {
         List<Course> courseList = new ArrayList<>(list.size() * 2 + 1);
         for (Course course : list) {
             try {
-                course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
-                course.setCourseWeek(objectMapper.readValue(course.getJsonCourseWeek(), String[].class));
                 int index = 0;
-                for (Map.Entry<String, String> entry : course.getCourseNormalDate().entrySet()) {
-                    Course c = new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), entry.getKey(), entry.getValue(), course.getCourseWeek()[index++]);
-                    if (courseDate.equals(c.getCourseShowDate()) && isCourseEffect(initDate, c)) {
-                        courseList.add(c);
+                String[] weeks = objectMapper.readValue(course.getJsonCourseWeek(), String[].class);
+                if (course.getCourseDate().contains(",")) {
+                    String[] dates = course.getCourseDate().split(",");
+                    for (String date : dates) {
+                        String[] s = date.split(" ");
+                        if (!s[0].equals(courseDate) || !isCourseEffect(initDate, weeks[index])) {
+                            continue;
+                        }
+                        courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index++]));
                     }
+                } else {
+                    String[] s = course.getCourseDate().split(" ");
+                    courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index]));
                 }
             } catch (Exception e) {
                 return new Result(Code.LIST_DATE_FAILED, null);
@@ -162,25 +204,34 @@ public class CourseServiceImpl implements CourseService {
         List<Course> courseList = new ArrayList<>(list.size() * 2 + 1);
         for (Course course : list) {
             try {
-                course.setCourseNormalDate(objectMapper.readValue(course.getCourseDate(), mapType));
-                course.setCourseWeek(objectMapper.readValue(course.getJsonCourseWeek(), String[].class));
                 int index = 0;
-                for (Map.Entry<String, String> entry : course.getCourseNormalDate().entrySet()) {
-                    Course c = new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), entry.getKey(), entry.getValue(), course.getCourseWeek()[index++]);
-                    if (isCourseEffect(initDate, c)) {
-                        courseList.add(c);
+                String[] weeks = objectMapper.readValue(course.getJsonCourseWeek(), String[].class);
+                if (course.getCourseDate().contains(",")) {
+                    String[] dates = course.getCourseDate().split(",");
+                    for (String date : dates) {
+                        String[] s = date.split(" ");
+                        if (!isCourseEffect(initDate, weeks[index])) {
+                            continue;
+                        }
+                        courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index++]));
                     }
+                } else {
+                    if (!isCourseEffect(initDate, weeks[index])) {
+                        continue;
+                    }
+                    String[] s = course.getCourseDate().split(" ");
+                    courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index]));
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 return new Result(Code.LIST_ALL_FAILED, null);
             }
         }
         return new Result(Code.LIST_ALL_SUCCESS, courseList);
     }
 
-    private boolean isCourseEffect(String initDate, Course course) throws ParseException {
+    private boolean isCourseEffect(String initDate, String courseWeek) throws ParseException {
         String currentWeek = Utils.calcCurrentWeek(new Date(), Utils.transitionStrToDate(initDate));
-        String courseWeek = course.getCourseShowWeek();
         String[] str = courseWeek.split("-");
         return Integer.parseInt(currentWeek) >= Integer.parseInt(str[0]) && Integer.parseInt(currentWeek) <= Integer.parseInt(str[1]);
     }

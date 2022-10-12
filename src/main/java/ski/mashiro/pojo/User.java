@@ -16,4 +16,5 @@ public class User {
     private Date termInitialDate;
     private String currentWeek;
     private String userTableName;
+    private String userApiToken;
 }

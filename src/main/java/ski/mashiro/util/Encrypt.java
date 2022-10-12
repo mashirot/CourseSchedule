@@ -18,8 +18,8 @@ public class Encrypt {
         }
         return sb.toString();
     }
-    public static String encryptPassword(String password, String salt) {
-        String addSaltPasswd = password.substring(0, password.length() / 2) + salt + password.substring(password.length() / 2);
+    public static String encrypt(String str, String salt) {
+        String addSaltPasswd = str.substring(0, str.length() / 2) + salt + str.substring(str.length() / 2);
         return DigestUtils.sha3_256Hex(addSaltPasswd).substring(20,52);
     }
 }
