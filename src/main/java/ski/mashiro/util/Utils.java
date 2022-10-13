@@ -33,7 +33,7 @@ public class Utils {
     }
 
     public static String getWeek() {
-        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
         switch (dayOfWeek) {
             case 1: return "Monday";
             case 2: return "Tuesday";
@@ -47,7 +47,9 @@ public class Utils {
     }
 
     public static String calcCurrentWeek(Date currentDate, Date initDate) {
-        return String.valueOf((currentDate.getTime() - initDate.getTime()) / (7 * 24 * 60 * 60 * 1000) + 1);
+        Calendar init = Calendar.getInstance();
+        init.setTime(initDate);
+        return String.valueOf((currentDate.getTime() - initDate.getTime() - (init.get(Calendar.DAY_OF_WEEK) - 1) * (24 * 60 * 60 * 1000)) / (7 * 24 * 60 * 60 * 1000) + 1);
     }
 
     public static List<Course> analyzeScheduleFile(MultipartFile multipartFile) {

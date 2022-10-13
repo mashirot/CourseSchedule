@@ -191,6 +191,9 @@ public class CourseServiceImpl implements CourseService {
                         courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index++]));
                     }
                 } else {
+                    if (!isCourseEffect(initDate, weeks[index])) {
+                        continue;
+                    }
                     String[] s = course.getCourseDate().split(" ");
                     courseList.add(new Course(course.getCourseName(), course.getCourseLocation(), course.getCourseLecturer(), s[0], s[1], weeks[index]));
                 }
