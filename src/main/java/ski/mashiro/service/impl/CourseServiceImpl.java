@@ -182,6 +182,7 @@ public class CourseServiceImpl implements CourseService {
                     for (String date : dates) {
                         String[] s = date.split(" ");
                         if (!s[0].equals(courseDate)) {
+                            index++;
                             continue;
                         }
                         if (!isCourseEffect(initDate, weeks[index])) {
