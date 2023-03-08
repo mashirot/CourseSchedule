@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ski.mashiro.dao.UserDao">
+
+    <insert id="saveUser">
+        insert into user (username, password, term_start_date, term_end_date, api_token)
+        values (#{user.username}, #{user.password}, #{user.termStartDate}, #{user.termEndDate}, #{user.apiToken});
+    </insert>
+    <update id="updateUser">
+        update user
+        <set>
+            <if test="user.password != null">password = #{user.password},</if>
+            <if test="user.termStartDate != null">term_start_date = #{user.termStartDate},</if>
+            <if test="user.termEndDate != null">term_end_date = #{user.termEndDate}</if>
+        </set>
+        where uid = #{user.uid};
+    </update>
+    <select id="getUserByUsername" resultType="ski.mashiro.pojo.User">
+        select uid, username, term_start_date, term_end_date
+        from user
+        where username = #{username};
+    </select>
+    <select id="getUserByApiToken" resultType="ski.mashiro.pojo.User">
+        select uid, username, term_start_date, term_end_date
+        from user
+        where username = #{username} and api_token = #{apiToken};
+    </select>
+    <select id="getPasswordByUsername" resultType="java.lang.String">
+        select password
+        from user
+        where username = #{username};
+    </select>
+    <select id="getApiTokenByUsername" resultType="java.lang.String">
+        select api_token
+        from user
+        where username = #{username};
+    </select>
+</mapper>

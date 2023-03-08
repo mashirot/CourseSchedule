@@ -1,0 +1,74 @@
+package ski.mashiro.service.impl;
+
+import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
+import ski.mashiro.dao.UserDao;
+import ski.mashiro.pojo.User;
+import ski.mashiro.service.UserService;
+import ski.mashiro.vo.Result;
+
+import static ski.mashiro.constant.StatusCodeConstants.*;
+
+/**
+ * @author MashiroT
+ */
+@Service
+public class UserServiceImpl implements UserService {
+
+    private final UserDao userDao;
+
+    @Autowired
+    public UserServiceImpl(UserDao userDao) {
+        this.userDao = userDao;
+    }
+
+    @Override
+    public Result<String> saveUser(User user) {
+        user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
+        user.setApiToken(DigestUtils.md5DigestAsHex(BCrypt.hashpw(user.getUid() + user.getUsername() + user.getTermStartDate() + user.getTermEndDate(), BCrypt.gensalt()).getBytes()));
+        if (userDao.saveUser(user) == 1) {
+            return Result.success(USER_REG_SUCCESS, null);
+        }
+        return Result.failed(USER_REG_FAILED, null);
+    }
+
+    @Override
+    public Result<User> getUserByPassword(User user) {
+        String passwordByUsername = userDao.getPasswordByUsername(user.getUsername());
+        boolean checkpw = BCrypt.checkpw(user.getPassword(), passwordByUsername);
+        if (checkpw) {
+            return Result.success(USER_LOGIN_SUCCESS, userDao.getUserByUsername(user.getUsername()));
+        }
+        return Result.failed(USER_LOGIN_FAILED, null);
+    }
+
+    @Override
+    public Result<User> getUserByApiToken(User user) {
+        User rsUser = userDao.getUserByApiToken(user.getUsername(), user.getApiToken());
+        if (rsUser != null) {
+            return Result.success(USER_LOGIN_SUCCESS, rsUser);
+        }
+        return Result.failed(USER_LOGIN_FAILED, null);
+    }
+
+    @Override
+    public Result<User> getApiTokenByUsername(User user) {
+        String token = userDao.getApiTokenByUsername(user.getUsername());
+        if (token == null) {
+            return Result.failed(USER_GET_API_FAILED, null);
+        }
+        user.setApiToken(token);
+        return Result.success(USER_GET_API_SUCCESS, user);
+    }
+
+    @Override
+    public Result<String> updateUser(User user) {
+        int rs = userDao.updateUser(user);
+        if (rs == 1) {
+            return Result.success(USER_MODIFY_SUCCESS, null);
+        }
+        return Result.failed(USER_MODIFY_FAILED, null);
+    }
+}

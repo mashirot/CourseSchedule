@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ski.mashiro.dao.CourseDao">
+    <insert id="insertCourse" keyProperty="courseId" useGeneratedKeys="true">
+        insert into course (uid, day_of_week, start_time, end_time, name, place, teacher, start_week, end_week, odd_week, credit)
+        values (#{course.uid}, #{course.dayOfWeek}, #{course.startTime}, #{course.endTime}, #{course.name}, #{course.place}, #{course.teacher},
+                #{course.startWeek}, #{course.endWeek}, #{course.oddWeek}, #{course.credit});
+    </insert>
+    <update id="updateCourse">
+        update course
+        <set>
+           <if test="course.dayOfWeek != null">day_of_week = #{course.dayOfWeek},</if>
+           <if test="course.startTime != null">start_time = #{course.startTime},</if>
+           <if test="course.endTime != null">end_time = #{course.endTime},</if>
+           <if test="course.name != null">name = #{course.name},</if>
+           <if test="course.place != null">place = #{course.place},</if>
+           <if test="course.teacher != null">teacher = #{course.teacher},</if>
+           <if test="course.startWeek != null">start_week = #{course.startWeek},</if>
+           <if test="course.endWeek != null">end_week = #{course.endWeek},</if>
+           <if test="course.oddWeek != null">odd_week = #{course.oddWeek},</if>
+           <if test="course.credit != null">credit = #{course.credit},</if>
+        </set>
+        where uid = #{course.uid} and course_id = #{course.courseId};
+    </update>
+    <delete id="delCourseByCondition">
+        delete
+        from course
+        where uid = #{course.uid}
+        <if test="course.courseId != null">
+            and course_id = #{course.courseId}
+        </if>
+        ;
+    </delete>
+    <select id="listCourseByCondition" resultType="ski.mashiro.pojo.Course">
+        select course_id, day_of_week, start_time, end_time, name, place, teacher, start_week, end_week, odd_week, credit
+        from course
+        where uid = #{course.uid}
+        <if test="course.currWeek != null">
+            and #{course.currWeek} between start_week and end_week
+        </if>
+        <if test="course.dayOfWeek != null">
+            and day_of_week = #{course.dayOfWeek}
+        </if>
+        ;
+    </select>
+</mapper>
