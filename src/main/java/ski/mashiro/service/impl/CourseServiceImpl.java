@@ -12,6 +12,7 @@ import ski.mashiro.dto.CourseSearchDto;
 import ski.mashiro.util.FileUtils;
 import ski.mashiro.pojo.Course;
 import ski.mashiro.service.CourseService;
+import ski.mashiro.util.WeekUtils;
 import ski.mashiro.vo.Result;
 
 import java.io.BufferedReader;
@@ -95,7 +96,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Result<List<CourseDto>> listCourseByCondition(CourseSearchDto courseSearchDto) {
         if (courseSearchDto.getTermStartDate() != null) {
-            courseSearchDto.setCurrWeek(Weeks.between(LocalDateTime.ofInstant(courseSearchDto.getTermStartDate().toInstant(), ZoneId.systemDefault()), LocalDateTime.now()).getAmount());
+            courseSearchDto.setCurrWeek(WeekUtils.getCurrWeek(courseSearchDto.getTermStartDate()));
         }
         return listCourse(courseSearchDto);
     }
