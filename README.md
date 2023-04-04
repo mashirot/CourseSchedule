@@ -21,3 +21,5 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 ```
+
+然后打开shell，`java -jar ./CourseSchedule-2.0.0.jar`
