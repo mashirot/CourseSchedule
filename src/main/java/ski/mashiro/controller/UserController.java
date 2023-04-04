@@ -17,7 +17,7 @@ import static ski.mashiro.constant.StatusCodeConstants.USER_LOGOUT_SUCCESS;
  * @author MashiroT
  */
 @RestController
-@CrossOrigin("https://schedule.mashiro.ski")
+@CrossOrigin
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;

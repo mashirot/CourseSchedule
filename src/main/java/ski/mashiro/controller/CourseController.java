@@ -17,7 +17,7 @@ import java.util.List;
  * @author MashiroT
  */
 @RestController
-@CrossOrigin("https://schedule.mashiro.ski")
+@CrossOrigin
 @RequestMapping("/sched")
 public class CourseController {
 
