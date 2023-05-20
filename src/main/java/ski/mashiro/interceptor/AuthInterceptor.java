@@ -28,6 +28,9 @@ public class AuthInterceptor implements HandlerInterceptor {
         if("OPTIONS".equalsIgnoreCase(request.getMethod())){
             return true;
         }
+        if (!(handler instanceof HandlerMethod)) {
+            return true;
+        }
         String authToken = request.getHeader("Authorization");
         Method method = ((HandlerMethod) handler).getMethod();
         if (method.isAnnotationPresent(TokenRequired.class)) {
