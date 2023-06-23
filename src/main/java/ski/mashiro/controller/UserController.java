@@ -46,11 +46,7 @@ public class UserController {
         if (rs.code() != USER_LOGIN_SUCCESS) {
             return Result.failed(rs.code(), rs.msg());
         }
-        String authToken = JwtUtils.createToken(userLogin.getUsername());
-        request.getSession().setAttribute("uid", rs.data().getUid());
-        request.getSession().setAttribute("username", rs.data().getUsername());
-        request.getSession().setAttribute("termStartDate", rs.data().getTermStartDate());
-        request.getSession().setAttribute("Authorization", "Bearer " + authToken);
+        String authToken = JwtUtils.createToken(rs.data().getUid(), rs.data().getUsername(), rs.data().getTermStartDate());
         return Result.success(USER_LOGIN_SUCCESS, new UserLoginVo(userLogin.getUsername(), authToken));
     }
 
