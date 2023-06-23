@@ -25,34 +25,28 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if("OPTIONS".equalsIgnoreCase(request.getMethod())){
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
         String authToken = request.getHeader("Authorization");
+        String localToken = (String) request.getSession().getAttribute("Authorization");
         Method method = ((HandlerMethod) handler).getMethod();
         if (method.isAnnotationPresent(TokenRequired.class)) {
             TokenRequired tokenRequired = method.getAnnotation(TokenRequired.class);
             if (tokenRequired.required()) {
-                if (authToken == null) {
+                if (authToken == null || localToken == null) {
                     response.getWriter().write(OBJECT_MAPPER.writeValueAsString(Result.failed(StatusCodeConstants.AUTH_VERIFY_FAILED, null)));
                     return false;
                 }
-                String uid;
-                try {
-                    uid = JWT.decode(authToken).getClaim("uid").asString();
-                } catch (JWTDecodeException e) {
+                String username = (String) request.getSession().getAttribute("username");
+                if (username == null) {
                     response.getWriter().write(OBJECT_MAPPER.writeValueAsString(Result.failed(StatusCodeConstants.AUTH_VERIFY_FAILED, null)));
                     return false;
                 }
-                try {
-                    if (JwtUtils.verifyToken(authToken, uid)) {
-                        response.getWriter().write(OBJECT_MAPPER.writeValueAsString(Result.failed(StatusCodeConstants.AUTH_VERIFY_FAILED, null)));
-                        return false;
-                    }
-                } catch (Exception e) {
+                if (JwtUtils.verifyToken(authToken, username)) {
                     response.getWriter().write(OBJECT_MAPPER.writeValueAsString(Result.failed(StatusCodeConstants.AUTH_VERIFY_FAILED, null)));
                     return false;
                 }

@@ -11,19 +11,18 @@ import java.util.Date;
  */
 public class JwtUtils {
 
-    private static final int EXPIRE_TIME = 15 * 60 * 1000;
     private static final String ALGORITHM_SALT = "a";
 
-    public static String createToken(int uid) {
+    public static String createToken(String username) {
         return JWT.create()
-                .withClaim("uid", uid)
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRE_TIME))
-                .sign(Algorithm.HMAC512(uid + ALGORITHM_SALT));
+                .sign(Algorithm.HMAC512(username + ALGORITHM_SALT));
     }
 
-    public static boolean verifyToken(String authToken, String uid) {
+    public static boolean verifyToken(String authToken, String username) {
         try {
-            JWT.require(Algorithm.HMAC512(uid + ALGORITHM_SALT)).build().verify(authToken);
+            JWT.require(Algorithm.HMAC512(username + ALGORITHM_SALT))
+                    .build()
+                    .verify(authToken);
             return true;
         } catch (JWTVerificationException | IllegalArgumentException e) {
             return false;
