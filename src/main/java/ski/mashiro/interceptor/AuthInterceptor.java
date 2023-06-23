@@ -9,7 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import ski.mashiro.annotation.TokenRequired;
 import ski.mashiro.constant.StatusCodeConstants;
 import ski.mashiro.util.JwtUtils;
-import ski.mashiro.vo.Result;
+import ski.mashiro.dto.Result;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

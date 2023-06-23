@@ -5,12 +5,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ski.mashiro.dto.CourseDto;
-import ski.mashiro.dto.CourseSearchDto;
+import ski.mashiro.vo.CourseVo;
+import ski.mashiro.vo.CourseSearchVo;
 import ski.mashiro.pojo.User;
 import ski.mashiro.service.CourseService;
 import ski.mashiro.service.UserService;
-import ski.mashiro.vo.Result;
+import ski.mashiro.dto.Result;
 
 import java.util.List;
 
@@ -31,8 +31,8 @@ public class ApiController {
     }
 
     @PostMapping("/sel")
-    public Result<List<CourseDto>> listCourseByCondition(@RequestBody CourseSearchDto courseSearchDto) {
-        return courseService.listCourseByCondition(courseSearchDto);
+    public Result<List<CourseVo>> listCourseByCondition(@RequestBody CourseSearchVo courseSearchVo) {
+        return courseService.listCourseByCondition(courseSearchVo);
     }
 
     @PostMapping("/login")

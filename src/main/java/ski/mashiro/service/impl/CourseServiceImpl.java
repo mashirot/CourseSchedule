@@ -5,21 +5,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
-import org.threeten.extra.Weeks;
 import ski.mashiro.dao.CourseDao;
-import ski.mashiro.dto.CourseDto;
-import ski.mashiro.dto.CourseSearchDto;
+import ski.mashiro.vo.CourseVo;
+import ski.mashiro.vo.CourseSearchVo;
 import ski.mashiro.util.FileUtils;
 import ski.mashiro.pojo.Course;
 import ski.mashiro.service.CourseService;
 import ski.mashiro.util.WeekUtils;
-import ski.mashiro.vo.Result;
+import ski.mashiro.dto.Result;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -76,8 +73,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Result<String> delCourse(CourseSearchDto courseSearchDto) {
-        int rs = courseDao.delCourseByCondition(courseSearchDto);
+    public Result<String> delCourse(CourseSearchVo courseSearchVo) {
+        int rs = courseDao.delCourseByCondition(courseSearchVo);
         if (rs != 0) {
             return Result.success(COURSE_DELETE_SUCCESS, null);
         }
@@ -94,31 +91,31 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Result<List<CourseDto>> listCourseByCondition(CourseSearchDto courseSearchDto) {
-        if (courseSearchDto.getTermStartDate() != null) {
-            courseSearchDto.setCurrWeek(WeekUtils.getCurrWeek(courseSearchDto.getTermStartDate()));
+    public Result<List<CourseVo>> listCourseByCondition(CourseSearchVo courseSearchVo) {
+        if (courseSearchVo.getTermStartDate() != null) {
+            courseSearchVo.setCurrWeek(WeekUtils.getCurrWeek(courseSearchVo.getTermStartDate()));
         }
-        return listCourse(courseSearchDto);
+        return listCourse(courseSearchVo);
     }
 
     @Override
-    public Result<List<CourseDto>> listCourse(CourseSearchDto courseSearchDto) {
-        List<Course> courses = courseDao.listCourseByCondition(courseSearchDto);
+    public Result<List<CourseVo>> listCourse(CourseSearchVo courseSearchVo) {
+        List<Course> courses = courseDao.listCourseByCondition(courseSearchVo);
         if (courses == null) {
             return Result.failed(COURSE_LIST_FAILED, null);
         }
-        List<CourseDto> courseDtoList = new ArrayList<>(courses.size());
+        List<CourseVo> courseVoList = new ArrayList<>(courses.size());
         for (Course course : courses) {
-            if (courseSearchDto.getTermStartDate() != null && course.getOddWeek() != 0) {
-                if ((courseSearchDto.getCurrWeek() & 1) == (course.getOddWeek() & 1)) {
-                    courseDtoList.add(new CourseDto(course.getCourseId(), course.getDayOfWeek(), course.getStartTime() + " - " + course.getEndTime(),
+            if (courseSearchVo.getTermStartDate() != null && course.getOddWeek() != 0) {
+                if ((courseSearchVo.getCurrWeek() & 1) == (course.getOddWeek() & 1)) {
+                    courseVoList.add(new CourseVo(course.getCourseId(), course.getDayOfWeek(), course.getStartTime() + " - " + course.getEndTime(),
                             course.getName(), course.getPlace(), course.getTeacher(), course.getStartWeek() + " - " + course.getEndWeek(), course.getCredit()));
                 }
                 continue;
             }
-            courseDtoList.add(new CourseDto(course.getCourseId(), course.getDayOfWeek(), course.getStartTime() + " - " + course.getEndTime(),
+            courseVoList.add(new CourseVo(course.getCourseId(), course.getDayOfWeek(), course.getStartTime() + " - " + course.getEndTime(),
                     course.getName(), course.getPlace(), course.getTeacher(), course.getStartWeek() + " - " + course.getEndWeek(), course.getCredit()));
         }
-        return Result.success(COURSE_LIST_SUCCESS, courseDtoList);
+        return Result.success(COURSE_LIST_SUCCESS, courseVoList);
     }
 }

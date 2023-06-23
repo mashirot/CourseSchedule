@@ -5,6 +5,8 @@ package ski.mashiro.constant;
  */
 public class StatusCodeConstants {
     public static final int AUTH_VERIFY_FAILED = 10000;
+    public static final int CAPTCHA_GENERATE_SUCCESS = 10061;
+    public static final int CAPTCHA_VERIFY_FAILED = 10060;
     public static final int USER_REG_SUCCESS = 10051;
     public static final int USER_REG_FAILED = 10050;
     public static final int USER_LOGIN_SUCCESS = 10011;

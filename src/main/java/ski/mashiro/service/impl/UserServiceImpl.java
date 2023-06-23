@@ -7,7 +7,7 @@ import org.springframework.util.DigestUtils;
 import ski.mashiro.dao.UserDao;
 import ski.mashiro.pojo.User;
 import ski.mashiro.service.UserService;
-import ski.mashiro.vo.Result;
+import ski.mashiro.dto.Result;
 
 import static ski.mashiro.constant.StatusCodeConstants.*;
 

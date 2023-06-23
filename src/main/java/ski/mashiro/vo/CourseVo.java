@@ -1,4 +1,4 @@
-package ski.mashiro.dto;
+package ski.mashiro.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CourseDto {
+public class CourseVo {
     private Integer courseId;
     private String dayOfWeek;
     private String time;

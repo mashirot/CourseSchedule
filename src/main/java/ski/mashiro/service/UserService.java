@@ -1,7 +1,7 @@
 package ski.mashiro.service;
 
 import ski.mashiro.pojo.User;
-import ski.mashiro.vo.Result;
+import ski.mashiro.dto.Result;
 
 /**
  * @author MashiroT

@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ski.mashiro.annotation.TokenRequired;
-import ski.mashiro.dto.CourseDto;
-import ski.mashiro.dto.CourseSearchDto;
+import ski.mashiro.vo.CourseVo;
+import ski.mashiro.vo.CourseSearchVo;
 import ski.mashiro.pojo.Course;
 import ski.mashiro.service.CourseService;
-import ski.mashiro.vo.Result;
+import ski.mashiro.dto.Result;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -42,8 +42,8 @@ public class CourseController {
 
     @TokenRequired
     @PostMapping("/del")
-    public Result<String> delCourse(@RequestBody CourseSearchDto courseSearchDto) {
-        return courseService.delCourse(courseSearchDto);
+    public Result<String> delCourse(@RequestBody CourseSearchVo courseSearchVo) {
+        return courseService.delCourse(courseSearchVo);
     }
 
     @TokenRequired
@@ -54,19 +54,19 @@ public class CourseController {
 
     @TokenRequired
     @PostMapping("/eff")
-    public Result<List<CourseDto>> listEffCourse(@RequestBody CourseSearchDto courseSearchDto) {
-        return courseService.listCourseByCondition(courseSearchDto);
+    public Result<List<CourseVo>> listEffCourse(@RequestBody CourseSearchVo courseSearchVo) {
+        return courseService.listCourseByCondition(courseSearchVo);
     }
 
     @TokenRequired
     @PostMapping("/sel")
-    public Result<List<CourseDto>> listCourseByCondition(@RequestBody CourseSearchDto courseSearchDto) {
-        return courseService.listCourseByCondition(courseSearchDto);
+    public Result<List<CourseVo>> listCourseByCondition(@RequestBody CourseSearchVo courseSearchVo) {
+        return courseService.listCourseByCondition(courseSearchVo);
     }
 
     @TokenRequired
     @PostMapping("/all")
-    public Result<List<CourseDto>> listCourse(@RequestBody CourseSearchDto courseSearchDto) {
-        return courseService.listCourse(courseSearchDto);
+    public Result<List<CourseVo>> listCourse(@RequestBody CourseSearchVo courseSearchVo) {
+        return courseService.listCourse(courseSearchVo);
     }
 }

@@ -6,7 +6,7 @@ import ski.mashiro.annotation.TokenRequired;
 import ski.mashiro.pojo.User;
 import ski.mashiro.service.UserService;
 import ski.mashiro.util.JwtUtils;
-import ski.mashiro.vo.Result;
+import ski.mashiro.dto.Result;
 
 import javax.servlet.http.HttpServletRequest;
 
