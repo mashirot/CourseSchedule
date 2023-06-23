@@ -16,10 +16,6 @@ spring:
       password: passwd
   jackson:
     time-zone: GMT+8
-  graphql:
-    cors:
-#      改成你的前端url
-      allowed-origins: "https://xxx"
 mybatis:
   mapper-locations: classpath://ski/mashiro/dao/*.xml
   configuration:
