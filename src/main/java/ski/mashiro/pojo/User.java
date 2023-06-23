@@ -19,5 +19,16 @@ public class User {
     private Date termStartDate;
     private Date termEndDate;
     private String apiToken;
-    private String authToken;
+
+    public User(String username, String password, Date termStartDate, Date termEndDate) {
+        this.username = username;
+        this.password = password;
+        this.termStartDate = termStartDate;
+        this.termEndDate = termEndDate;
+    }
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 }

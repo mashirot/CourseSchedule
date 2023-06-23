@@ -7,17 +7,17 @@ import ski.mashiro.pojo.User;
 import ski.mashiro.service.UserService;
 import ski.mashiro.util.JwtUtils;
 import ski.mashiro.dto.Result;
+import ski.mashiro.vo.UserLoginVo;
+import ski.mashiro.vo.UserRegVo;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static ski.mashiro.constant.StatusCodeConstants.USER_LOGIN_SUCCESS;
-import static ski.mashiro.constant.StatusCodeConstants.USER_LOGOUT_SUCCESS;
+import static ski.mashiro.constant.StatusCodeConstants.*;
 
 /**
  * @author MashiroT
  */
 @RestController
-@CrossOrigin
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
@@ -28,23 +28,36 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Result<String> register(@RequestBody User user) {
-        return userService.saveUser(user);
+    public Result<String> register(HttpServletRequest request, @RequestBody UserRegVo userReg) {
+        String captcha = (String) request.getSession().getAttribute("captcha");
+        try {
+            if (!captcha.equalsIgnoreCase(userReg.getCaptchaCode())) {
+                return Result.failed(CAPTCHA_VERIFY_FAILED, "验证码错误");
+            }
+        } catch (Exception e) {
+            return Result.failed(CAPTCHA_VERIFY_FAILED, "验证码错误");
+        }
+        return userService.saveUser(userReg);
     }
 
     @PostMapping("/login")
-    public Result<User> login(@RequestBody User user) {
-        Result<User> rsUser = userService.getUserByPassword(user);
-        if (rsUser.code() != USER_LOGIN_SUCCESS) {
-            return Result.failed(rsUser.code(), rsUser.msg());
+    public Result<UserLoginVo> login(HttpServletRequest request, @RequestBody UserLoginVo userLogin) {
+        Result<User> rs = userService.getUserByPassword(userLogin);
+        if (rs.code() != USER_LOGIN_SUCCESS) {
+            return Result.failed(rs.code(), rs.msg());
         }
-        rsUser.data().setAuthToken(JwtUtils.createToken(rsUser.data().getUid()));
-        return rsUser;
+        String authToken = JwtUtils.createToken(userLogin.getUsername());
+        request.getSession().setAttribute("uid", rs.data().getUid());
+        request.getSession().setAttribute("username", rs.data().getUsername());
+        request.getSession().setAttribute("termStartDate", rs.data().getTermStartDate());
+        request.getSession().setAttribute("Authorization", "Bearer " + authToken);
+        return Result.success(USER_LOGIN_SUCCESS, new UserLoginVo(userLogin.getUsername(), authToken));
     }
+
     @TokenRequired
     @PostMapping("/logout")
     public Result<String> logout(HttpServletRequest req) {
-        req.getSession().removeAttribute("uid");
+        req.getSession().removeAttribute("Authorization");
         return Result.success(USER_LOGOUT_SUCCESS, null);
     }
 

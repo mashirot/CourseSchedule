@@ -8,6 +8,8 @@ import ski.mashiro.dao.UserDao;
 import ski.mashiro.pojo.User;
 import ski.mashiro.service.UserService;
 import ski.mashiro.dto.Result;
+import ski.mashiro.vo.UserLoginVo;
+import ski.mashiro.vo.UserRegVo;
 
 import static ski.mashiro.constant.StatusCodeConstants.*;
 
@@ -25,9 +27,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<String> saveUser(User user) {
+    public Result<String> saveUser(UserRegVo userReg) {
+        var user = new User(userReg.getUsername(), userReg.getPassword(), userReg.getTermStartDate(), userReg.getTermEndDate());
         user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
-        user.setApiToken(DigestUtils.md5DigestAsHex(BCrypt.hashpw(user.getUid() + user.getUsername() + user.getTermStartDate() + user.getTermEndDate(), BCrypt.gensalt()).getBytes()));
+        user.setApiToken(DigestUtils.md5DigestAsHex(BCrypt.hashpw(user.getUsername() + user.getTermStartDate() + user.getTermEndDate(), BCrypt.gensalt()).getBytes()));
         if (userDao.saveUser(user) == 1) {
             return Result.success(USER_REG_SUCCESS, null);
         }
@@ -35,11 +38,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<User> getUserByPassword(User user) {
-        String passwordByUsername = userDao.getPasswordByUsername(user.getUsername());
-        boolean checkpw = BCrypt.checkpw(user.getPassword(), passwordByUsername);
-        if (checkpw) {
-            return Result.success(USER_LOGIN_SUCCESS, userDao.getUserByUsername(user.getUsername()));
+    public Result<User> getUserByPassword(UserLoginVo userLogin) {
+        var user = new User(userLogin.getUsername(), userLogin.getPassword());
+        var currUser = userDao.getUserByUsername(user.getUsername());
+        boolean checkPw = BCrypt.checkpw(user.getPassword(), currUser.getPassword());
+        if (checkPw) {
+            return Result.success(USER_LOGIN_SUCCESS, currUser);
         }
         return Result.failed(USER_LOGIN_FAILED, null);
     }
