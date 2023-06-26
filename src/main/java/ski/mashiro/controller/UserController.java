@@ -7,6 +7,7 @@ import ski.mashiro.pojo.User;
 import ski.mashiro.service.UserService;
 import ski.mashiro.util.JwtUtils;
 import ski.mashiro.dto.Result;
+import ski.mashiro.vo.UserInfoVo;
 import ski.mashiro.vo.UserLoginVo;
 import ski.mashiro.vo.UserRegVo;
 
@@ -50,22 +51,26 @@ public class UserController {
         return Result.success(USER_LOGIN_SUCCESS, new UserLoginVo(userLogin.getUsername(), authToken));
     }
 
-    @TokenRequired
-    @PostMapping("/logout")
-    public Result<String> logout(HttpServletRequest req) {
-        req.getSession().removeAttribute("Authorization");
-        return Result.success(USER_LOGOUT_SUCCESS, null);
-    }
+//    jwt无状态，只能自动过期，本项目未使用Redis
+//    @TokenRequired
+//    @PostMapping("/logout")
+//    public Result<String> logout(HttpServletRequest req) {
+//        req.getSession().removeAttribute("Authorization");
+//        return Result.success(USER_LOGOUT_SUCCESS, null);
+//    }
 
     @TokenRequired
-    @PostMapping("/api")
-    public Result<User> getApiToken(@RequestBody User user) {
-        return userService.getApiTokenByUsername(user);
+    @GetMapping("/info")
+    public Result<UserInfoVo> getUserInfo(HttpServletRequest request) {
+        var username = (String) request.getSession().getAttribute("username");
+        return userService.getUserInfoByUsername(username);
     }
 
     @TokenRequired
     @PostMapping("/modify")
-    public Result<String> modifyUser(@RequestBody User user) {
+    public Result<String> modifyUser(HttpServletRequest request, @RequestBody User user) {
+        Integer uid = (Integer) request.getSession().getAttribute("uid");
+        user.setUid(uid);
         return userService.updateUser(user);
     }
 }

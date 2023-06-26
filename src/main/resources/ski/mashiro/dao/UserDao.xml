@@ -18,7 +18,7 @@
         where uid = #{user.uid};
     </update>
     <select id="getUserByUsername" resultType="ski.mashiro.pojo.User">
-        select uid, username, password, term_start_date
+        select uid, username, password, term_start_date, term_end_date, api_token
         from user
         where username = #{username};
     </select>

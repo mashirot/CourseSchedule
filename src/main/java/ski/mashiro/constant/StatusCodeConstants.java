@@ -17,6 +17,7 @@ public class StatusCodeConstants {
     public static final int USER_GET_API_FAILED = 10030;
     public static final int USER_MODIFY_SUCCESS = 10041;
     public static final int USER_MODIFY_FAILED = 10040;
+    public static final int USER_INFO_SUCCESS = 10051;
     public static final int COURSE_INSERT_SUCCESS = 20051;
     public static final int COURSE_INSERT_FAILED = 20050;
     public static final int COURSE_DELETE_SUCCESS = 20061;

@@ -8,6 +8,8 @@ import ski.mashiro.dao.UserDao;
 import ski.mashiro.pojo.User;
 import ski.mashiro.service.UserService;
 import ski.mashiro.dto.Result;
+import ski.mashiro.util.WeekUtils;
+import ski.mashiro.vo.UserInfoVo;
 import ski.mashiro.vo.UserLoginVo;
 import ski.mashiro.vo.UserRegVo;
 
@@ -49,6 +51,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Result<UserInfoVo> getUserInfoByUsername(String username) {
+        var user = userDao.getUserByUsername(username);
+        int currWeek = WeekUtils.getCurrWeek(user.getTermStartDate());
+        return new Result<>(USER_INFO_SUCCESS, new UserInfoVo(user.getUsername(), user.getTermStartDate(), user.getTermEndDate(), currWeek, user.getApiToken()), null);
+    }
+
+    @Override
     public Result<User> getUserByApiToken(User user) {
         User rsUser = userDao.getUserByApiToken(user.getUsername(), user.getApiToken());
         if (rsUser != null) {
@@ -69,9 +78,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result<String> updateUser(User user) {
-        int rs = userDao.updateUser(user);
-        if (rs == 1) {
-            return Result.success(USER_MODIFY_SUCCESS, null);
+        try {
+            if (user.getPassword() != null) {
+                user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
+            }
+            int rs = userDao.updateUser(user);
+            if (rs == 1) {
+                return Result.success(USER_MODIFY_SUCCESS, null);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
         return Result.failed(USER_MODIFY_FAILED, null);
     }

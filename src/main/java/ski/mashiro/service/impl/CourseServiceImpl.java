@@ -69,6 +69,8 @@ public class CourseServiceImpl implements CourseService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return Result.failed(FILE_DESERIALIZE_FAILED, null);
+        } catch (Exception e) {
+            return Result.failed(FILE_DESERIALIZE_FAILED, null);
         }
         return Result.success(FILE_DESERIALIZE_SUCCESS, null);
     }

@@ -38,8 +38,9 @@ public class CourseController {
 
     @TokenRequired
     @PostMapping("/file")
-    public Result<String> uploadFile(@RequestBody MultipartFile courseFile, HttpServletRequest req) {
-        return courseService.saveCourseInFile(courseFile, Integer.parseInt(req.getParameter("uid")));
+    public Result<String> uploadFile(@RequestBody MultipartFile courseFile, HttpServletRequest request) {
+        Integer uid = (Integer) request.getSession().getAttribute("uid");
+        return courseService.saveCourseInFile(courseFile, uid);
     }
 
     @TokenRequired
