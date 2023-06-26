@@ -18,5 +18,6 @@ public class CourseVo {
     private String place;
     private String teacher;
     private String week;
+    private String oddWeek;
     private Double credit;
 }

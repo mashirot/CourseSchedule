@@ -36,12 +36,25 @@
     <select id="listCourseByCondition" resultType="ski.mashiro.pojo.Course">
         select course_id, day_of_week, start_time, end_time, name, place, teacher, start_week, end_week, odd_week, credit
         from course
-        where uid = #{course.uid}
+        where 1 = 1
+            and uid = #{course.uid}
+        <if test="course.name != null">
+            and name like concat('%', #{course.name}, '%')
+        </if>
+        <if test="course.place != null">
+            and place like concat('%', #{course.place}, '%')
+        </if>
         <if test="course.currWeek != null">
             and #{course.currWeek} between start_week and end_week
         </if>
         <if test="course.dayOfWeek != null">
             and day_of_week = #{course.dayOfWeek}
+        </if>
+        <if test="course.credit != null">
+            and credit = #{course.credit}
+        </if>
+        <if test="course.oddWeek != null">
+            and odd_week = #{course.oddWeek}
         </if>
         ;
     </select>

@@ -11,13 +11,13 @@ import ski.mashiro.service.CourseService;
 import ski.mashiro.dto.Result;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 
 /**
  * @author MashiroT
  */
 @RestController
-@CrossOrigin
 @RequestMapping("/sched")
 public class CourseController {
 
@@ -30,7 +30,9 @@ public class CourseController {
 
     @TokenRequired
     @PostMapping("/ins")
-    public Result<String> saveCourse(@RequestBody Course course) {
+    public Result<String> saveCourse(HttpServletRequest request, @RequestBody Course course) {
+        Integer uid = (Integer) request.getSession().getAttribute("uid");
+        course.setUid(uid);
         return courseService.saveCourse(course);
     }
 
@@ -42,31 +44,27 @@ public class CourseController {
 
     @TokenRequired
     @PostMapping("/del")
-    public Result<String> delCourse(@RequestBody CourseSearchVo courseSearchVo) {
+    public Result<String> delCourse(HttpServletRequest request, @RequestBody CourseSearchVo courseSearchVo) {
+        Integer uid = (Integer) request.getSession().getAttribute("uid");
+        courseSearchVo.setUid(uid);
         return courseService.delCourse(courseSearchVo);
     }
 
     @TokenRequired
     @PostMapping("/update")
-    public Result<String> updateCourse(@RequestBody Course course) {
+    public Result<String> updateCourse(HttpServletRequest request, @RequestBody Course course) {
+        Integer uid = (Integer) request.getSession().getAttribute("uid");
+        course.setUid(uid);
         return courseService.updateCourse(course);
     }
 
     @TokenRequired
-    @PostMapping("/eff")
-    public Result<List<CourseVo>> listEffCourse(@RequestBody CourseSearchVo courseSearchVo) {
-        return courseService.listCourseByCondition(courseSearchVo);
-    }
-
-    @TokenRequired
     @PostMapping("/sel")
-    public Result<List<CourseVo>> listCourseByCondition(@RequestBody CourseSearchVo courseSearchVo) {
+    public Result<List<CourseVo>> listCourseByCondition(HttpServletRequest request, @RequestBody CourseSearchVo courseSearchVo) {
+        Integer uid = (Integer) request.getSession().getAttribute("uid");
+        Date termStartDate = (Date) request.getSession().getAttribute("termStartDate");
+        courseSearchVo.setUid(uid);
+        courseSearchVo.setTermStartDate(termStartDate);
         return courseService.listCourseByCondition(courseSearchVo);
-    }
-
-    @TokenRequired
-    @PostMapping("/all")
-    public Result<List<CourseVo>> listCourse(@RequestBody CourseSearchVo courseSearchVo) {
-        return courseService.listCourse(courseSearchVo);
     }
 }

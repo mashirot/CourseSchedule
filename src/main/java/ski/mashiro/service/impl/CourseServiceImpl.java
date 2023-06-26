@@ -5,14 +5,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
+import ski.mashiro.bo.CourseSearchBo;
 import ski.mashiro.dao.CourseDao;
-import ski.mashiro.vo.CourseVo;
-import ski.mashiro.vo.CourseSearchVo;
-import ski.mashiro.util.FileUtils;
+import ski.mashiro.dto.Result;
 import ski.mashiro.pojo.Course;
 import ski.mashiro.service.CourseService;
+import ski.mashiro.util.FileUtils;
 import ski.mashiro.util.WeekUtils;
-import ski.mashiro.dto.Result;
+import ski.mashiro.vo.CourseSearchVo;
+import ski.mashiro.vo.CourseVo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -92,29 +93,31 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Result<List<CourseVo>> listCourseByCondition(CourseSearchVo courseSearchVo) {
-        if (courseSearchVo.getTermStartDate() != null) {
-            courseSearchVo.setCurrWeek(WeekUtils.getCurrWeek(courseSearchVo.getTermStartDate()));
-        }
-        return listCourse(courseSearchVo);
+        int currWeek = WeekUtils.getCurrWeek(courseSearchVo.getTermStartDate());
+        var courseSearchBo = new CourseSearchBo(courseSearchVo.getUid(), courseSearchVo.getName(), courseSearchVo.getPlace(), courseSearchVo.getIsEffective() ? currWeek : null, courseSearchVo.getDayOfWeek(), courseSearchVo.getCredit(), courseSearchVo.getOddWeek());
+        return listCourse(courseSearchBo);
     }
 
     @Override
-    public Result<List<CourseVo>> listCourse(CourseSearchVo courseSearchVo) {
-        List<Course> courses = courseDao.listCourseByCondition(courseSearchVo);
+    public Result<List<CourseVo>> listCourse(CourseSearchBo courseSearchBo) {
+        List<Course> courses = courseDao.listCourseByCondition(courseSearchBo);
         if (courses == null) {
             return Result.failed(COURSE_LIST_FAILED, null);
         }
         List<CourseVo> courseVoList = new ArrayList<>(courses.size());
         for (Course course : courses) {
-            if (courseSearchVo.getTermStartDate() != null && course.getOddWeek() != 0) {
-                if ((courseSearchVo.getCurrWeek() & 1) == (course.getOddWeek() & 1)) {
+//            查询有效 && 课程单双
+            if (courseSearchBo.getCurrWeek() != null && course.getOddWeek() != 0) {
+//                判断单双
+                if ((courseSearchBo.getCurrWeek() & 1) == (course.getOddWeek() & 1)) {
                     courseVoList.add(new CourseVo(course.getCourseId(), course.getDayOfWeek(), course.getStartTime() + " - " + course.getEndTime(),
-                            course.getName(), course.getPlace(), course.getTeacher(), course.getStartWeek() + " - " + course.getEndWeek(), course.getCredit()));
+                            course.getName(), course.getPlace(), course.getTeacher(), course.getStartWeek() + " - " + course.getEndWeek(), course.getOddWeek() == 1 ? "单" : "双", course.getCredit()));
                 }
                 continue;
             }
+//            查询全部 || 课程非单双
             courseVoList.add(new CourseVo(course.getCourseId(), course.getDayOfWeek(), course.getStartTime() + " - " + course.getEndTime(),
-                    course.getName(), course.getPlace(), course.getTeacher(), course.getStartWeek() + " - " + course.getEndWeek(), course.getCredit()));
+                    course.getName(), course.getPlace(), course.getTeacher(), course.getStartWeek() + " - " + course.getEndWeek(), "-", course.getCredit()));
         }
         return Result.success(COURSE_LIST_SUCCESS, courseVoList);
     }
