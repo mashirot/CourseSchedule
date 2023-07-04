@@ -20,6 +20,13 @@ mybatis:
   mapper-locations: classpath://ski/mashiro/dao/*.xml
   configuration:
     map-underscore-to-camel-case: true
+cors:
+  configuration:
+    allowedOriginPatterns: https://schedule.mashiro.ski
+    allowCredentials: true
+    allowedMethods: "*"
+    allowedHeaders: "*"
+    exposedHeaders: "*"
 ```
 
 然后打开shell，`java -jar ./CourseSchedule-2.0.0.jar`
