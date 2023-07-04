@@ -65,11 +65,9 @@ public class CourseServiceImpl implements CourseService {
                     return Result.failed(FILE_DESERIALIZE_FAILED, null);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
-            return Result.failed(FILE_DESERIALIZE_FAILED, null);
-        } catch (Exception e) {
             return Result.failed(FILE_DESERIALIZE_FAILED, null);
         }
         return Result.success(FILE_DESERIALIZE_SUCCESS, null);
@@ -119,7 +117,7 @@ public class CourseServiceImpl implements CourseService {
             }
 //            查询全部 || 课程非单双
             courseVoList.add(new CourseVo(course.getCourseId(), course.getDayOfWeek(), course.getStartTime() + " - " + course.getEndTime(),
-                    course.getName(), course.getPlace(), course.getTeacher(), course.getStartWeek() + " - " + course.getEndWeek(), "-", course.getCredit()));
+                    course.getName(), course.getPlace(), course.getTeacher(), course.getStartWeek() + " - " + course.getEndWeek(), course.getOddWeek() == 0 ? "-" : course.getOddWeek() == 1 ? "单" : "双", course.getCredit()));
         }
         return Result.success(COURSE_LIST_SUCCESS, courseVoList);
     }

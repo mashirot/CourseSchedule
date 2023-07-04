@@ -1,7 +1,5 @@
 package ski.mashiro.interceptor;
 
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -9,8 +7,8 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import ski.mashiro.annotation.TokenRequired;
 import ski.mashiro.constant.StatusCodeConstants;
-import ski.mashiro.util.JwtUtils;
 import ski.mashiro.dto.Result;
+import ski.mashiro.util.JwtUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
