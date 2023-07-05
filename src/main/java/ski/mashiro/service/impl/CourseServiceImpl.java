@@ -49,6 +49,9 @@ public class CourseServiceImpl implements CourseService {
     @Transactional(rollbackFor = IOException.class)
     @Override
     public Result<String> saveCourseInFile(MultipartFile courseFile, int uid) {
+        if (courseFile.getOriginalFilename() == null || !"txt".equals(courseFile.getOriginalFilename().split("\\.")[1]) || courseFile.getSize() > 16 * 1024) {
+            return Result.failed(FILE_DESERIALIZE_FAILED, null);
+        }
         Queue<String> strings;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(courseFile.getInputStream()))) {
             strings = FileUtils.fileDeserialize(reader);

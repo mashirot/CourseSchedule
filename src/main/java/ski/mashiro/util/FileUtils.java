@@ -12,7 +12,7 @@ import java.util.Queue;
  */
 public class FileUtils {
 
-    public static Course courseStringDeserialize(String str, int uid) throws IOException {
+    public static Course courseStringDeserialize(String str, int uid) {
 //        name|place|teacher|dayOfWeek|startTime-endTime|startWeek-endWeek|oddWeek|credit
         String[] items = str.split("\\|");
         Course course = new Course();
@@ -36,7 +36,7 @@ public class FileUtils {
         Queue<String> strQueue = new LinkedList<>();
         String line;
         while ((line = reader.readLine()) != null) {
-            strQueue.add(line.trim());
+            strQueue.offer(line.trim());
         }
         return strQueue;
     }
