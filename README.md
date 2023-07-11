@@ -14,6 +14,17 @@ spring:
       url: jdbc:mysql://url
       username: username
       password: passwd
+  redis:
+    host: 192.168.2.101
+    port: 6379
+    username: auth
+    password: ""
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: 100
   jackson:
     time-zone: GMT+8
 mybatis:

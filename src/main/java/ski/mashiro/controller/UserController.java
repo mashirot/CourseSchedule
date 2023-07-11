@@ -1,18 +1,18 @@
 package ski.mashiro.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import ski.mashiro.annotation.TokenRequired;
+import ski.mashiro.dto.Result;
 import ski.mashiro.pojo.User;
 import ski.mashiro.service.UserService;
-import ski.mashiro.util.JwtUtils;
-import ski.mashiro.dto.Result;
 import ski.mashiro.vo.UserInfoVo;
 import ski.mashiro.vo.UserLoginVo;
 import ski.mashiro.vo.UserRegVo;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static ski.mashiro.constant.RedisKeyConstant.*;
 import static ski.mashiro.constant.StatusCodeConstants.*;
 
 /**
@@ -22,10 +22,11 @@ import static ski.mashiro.constant.StatusCodeConstants.*;
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
+    private final StringRedisTemplate stringRedisTemplate;
 
-    @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, StringRedisTemplate stringRedisTemplate) {
         this.userService = userService;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @PostMapping("/register")
@@ -42,22 +43,25 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Result<UserLoginVo> login(HttpServletRequest request, @RequestBody UserLoginVo userLogin) {
-        Result<User> rs = userService.getUserByPassword(userLogin);
+    public Result<UserLoginVo> login(@RequestBody UserLoginVo userLogin) {
+        Result<UserLoginVo> rs = userService.getUserByPassword(userLogin);
         if (rs.code() != USER_LOGIN_SUCCESS) {
             return Result.failed(rs.code(), rs.msg());
         }
-        String authToken = JwtUtils.createToken(rs.data().getUid(), rs.data().getUsername(), rs.data().getTermStartDate());
-        return Result.success(USER_LOGIN_SUCCESS, new UserLoginVo(userLogin.getUsername(), authToken));
+        UserLoginVo user = rs.data();
+        return Result.success(USER_LOGIN_SUCCESS, user);
     }
 
-//    jwt无状态，只能自动过期，本项目未使用Redis
-//    @TokenRequired
-//    @PostMapping("/logout")
-//    public Result<String> logout(HttpServletRequest req) {
-//        req.getSession().removeAttribute("Authorization");
-//        return Result.success(USER_LOGOUT_SUCCESS, null);
-//    }
+    @TokenRequired
+    @GetMapping ("/logout")
+    public Result<String> logout(HttpServletRequest request) {
+        var username = (String) request.getSession().getAttribute("username");
+        stringRedisTemplate.delete(USER_KEY + username + USER_UID);
+        stringRedisTemplate.delete(USER_KEY + username + USER_INFO);
+        stringRedisTemplate.delete(USER_KEY + username + USER_CURR_WEEK);
+        request.getSession().removeAttribute("username");
+        return Result.success(USER_LOGOUT_SUCCESS, null);
+    }
 
     @TokenRequired
     @GetMapping("/info")
@@ -69,8 +73,8 @@ public class UserController {
     @TokenRequired
     @PostMapping("/modify")
     public Result<String> modifyUser(HttpServletRequest request, @RequestBody User user) {
-        Integer uid = (Integer) request.getSession().getAttribute("uid");
-        user.setUid(uid);
+        var username = (String) request.getSession().getAttribute("username");
+        user.setUsername(username);
         return userService.updateUser(user);
     }
 }

@@ -13,13 +13,11 @@ import java.util.Date;
 public class JwtUtils {
 
     private static final String ALGORITHM_SALT = "MashiroT";
-    private static final int EXPIRATION = 30 * 60 * 1000;
+    private static final int EXPIRATION = 24 * 60 * 60 * 1000;
 
-    public static String createToken(Integer uid, String username, Date termStartDate) {
+    public static String createToken(String username) {
         return JWT.create()
-                .withClaim("uid", uid)
                 .withClaim("username", username)
-                .withClaim("termStartDate", termStartDate)
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION))
                 .withIssuer("mashirot")
                 .withIssuedAt(new Date())

@@ -1,6 +1,9 @@
 package ski.mashiro.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -11,9 +14,11 @@ import ski.mashiro.dto.Result;
 import ski.mashiro.pojo.Course;
 import ski.mashiro.service.CourseService;
 import ski.mashiro.util.FileUtils;
+import ski.mashiro.util.JsonUtils;
 import ski.mashiro.util.WeekUtils;
 import ski.mashiro.vo.CourseSearchVo;
 import ski.mashiro.vo.CourseVo;
+import ski.mashiro.vo.UserInfoVo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,32 +26,34 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 import static ski.mashiro.constant.StatusCodeConstants.*;
+import static ski.mashiro.constant.RedisKeyConstant.*;
 
 /**
  * @author MashiroT
  */
 @Service
+@Slf4j
 public class CourseServiceImpl implements CourseService {
 
     private final CourseDao courseDao;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    public CourseServiceImpl(CourseDao courseDao) {
+    public CourseServiceImpl(CourseDao courseDao, StringRedisTemplate stringRedisTemplate, ObjectMapper objectMapper) {
         this.courseDao = courseDao;
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public Result<String> saveCourse(Course course) {
-        int rs = courseDao.insertCourse(course);
-        if (rs == 1) {
-            return Result.success(COURSE_INSERT_SUCCESS, null);
-        }
-        return Result.failed(COURSE_INSERT_FAILED, null);
+        return courseDao.insertCourse(course) > 0 ? Result.success(COURSE_INSERT_SUCCESS, null) : Result.failed(COURSE_INSERT_FAILED, null);
     }
 
-    @Transactional(rollbackFor = IOException.class)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Result<String> saveCourseInFile(MultipartFile courseFile, int uid) {
         if (courseFile.getOriginalFilename() == null || !"txt".equals(courseFile.getOriginalFilename().split("\\.")[1]) || courseFile.getSize() > 16 * 1024) {
@@ -94,6 +101,7 @@ public class CourseServiceImpl implements CourseService {
         return Result.failed(COURSE_UPDATE_FAILED, null);
     }
 
+//    Api用
     @Override
     public Result<List<CourseVo>> listCourseByCondition(CourseSearchVo courseSearchVo) {
         int currWeek = WeekUtils.getCurrWeek(courseSearchVo.getTermStartDate());
@@ -102,7 +110,40 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Result<List<CourseVo>> listCourseByCondition(String username, CourseSearchVo courseSearchVo) {
+        String key = USER_KEY + username;
+        Integer uid = getUid(username);
+        UserInfoVo userInfo;
+        try {
+            userInfo = objectMapper.readValue(stringRedisTemplate.opsForValue().get(key + USER_INFO), UserInfoVo.class);
+        } catch (JsonProcessingException e) {
+            log.warn("用户 {} CacheInfo 序列化失败：{}", username, e.getMessage());
+            return null;
+        }
+        Integer currWeek;
+        String currWeekJson;
+        if ((currWeekJson = stringRedisTemplate.opsForValue().get(key + USER_CURR_WEEK)) != null) {
+            currWeek = Integer.parseInt(currWeekJson);
+        } else {
+            currWeek = WeekUtils.getCurrWeek(userInfo.getTermStartDate());
+            stringRedisTemplate.opsForValue().set(key + USER_CURR_WEEK, String.valueOf(currWeek), 30, TimeUnit.MINUTES);
+        }
+        var courseSearchBo = new CourseSearchBo(uid, courseSearchVo.getName(), courseSearchVo.getPlace(), courseSearchVo.getIsEffective() ? currWeek : null, courseSearchVo.getDayOfWeek(), courseSearchVo.getCredit(), courseSearchVo.getOddWeek());
+        return listCourse(courseSearchBo);
+    }
+
+    @Override
     public Result<List<CourseVo>> listCourse(CourseSearchBo courseSearchBo) {
+//        判断有无缓存
+        String allCourseJson;
+        String allCourseKey = COURSE_KEY + courseSearchBo.getUid() + COURSE_ALL;
+        if (courseSearchBo.getCurrWeek() == null && (allCourseJson = stringRedisTemplate.opsForValue().get(allCourseKey)) != null) {
+            try {
+                return Result.success(COURSE_LIST_SUCCESS, JsonUtils.trans2List(objectMapper, allCourseJson, CourseVo.class));
+            } catch (JsonProcessingException e) {
+                log.warn(e.getMessage());
+            }
+        }
         List<Course> courses = courseDao.listCourseByCondition(courseSearchBo);
         if (courses == null) {
             return Result.failed(COURSE_LIST_FAILED, null);
@@ -122,6 +163,18 @@ public class CourseServiceImpl implements CourseService {
             courseVoList.add(new CourseVo(course.getCourseId(), course.getDayOfWeek(), course.getStartTime() + " - " + course.getEndTime(),
                     course.getName(), course.getPlace(), course.getTeacher(), course.getStartWeek() + " - " + course.getEndWeek(), course.getOddWeek() == 0 ? "-" : course.getOddWeek() == 1 ? "单" : "双", course.getCredit()));
         }
+//        查询所有，加缓存
+        if (courseSearchBo.getCurrWeek() == null) {
+            try {
+                stringRedisTemplate.opsForValue().set(allCourseKey, objectMapper.writeValueAsString(courseVoList), 24, TimeUnit.HOURS);
+            } catch (JsonProcessingException e) {
+                log.warn("{}", e.getMessage());
+            }
+        }
         return Result.success(COURSE_LIST_SUCCESS, courseVoList);
+    }
+
+    private Integer getUid(String username) {
+        return Integer.parseInt(stringRedisTemplate.opsForValue().get(USER_KEY + username + USER_UID));
     }
 }

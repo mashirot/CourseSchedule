@@ -1,6 +1,7 @@
 package ski.mashiro.vo;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Data;
 
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.Date;
  * @author MashiroT
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class UserInfoVo {
     private String username;

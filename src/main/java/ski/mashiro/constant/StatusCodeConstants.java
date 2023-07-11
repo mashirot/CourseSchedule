@@ -18,6 +18,7 @@ public class StatusCodeConstants {
     public static final int USER_MODIFY_SUCCESS = 10041;
     public static final int USER_MODIFY_FAILED = 10040;
     public static final int USER_INFO_SUCCESS = 10051;
+    public static final int USER_INFO_FAILED = 10050;
     public static final int COURSE_INSERT_SUCCESS = 20051;
     public static final int COURSE_INSERT_FAILED = 20050;
     public static final int COURSE_DELETE_SUCCESS = 20061;
@@ -28,4 +29,5 @@ public class StatusCodeConstants {
     public static final int COURSE_LIST_FAILED = 20010;
     public static final int FILE_DESERIALIZE_SUCCESS = 30051;
     public static final int FILE_DESERIALIZE_FAILED = 30050;
+    public static final int SYSTEM_ERR = 50000;
 }

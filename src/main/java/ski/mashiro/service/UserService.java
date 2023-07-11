@@ -14,6 +14,6 @@ public interface UserService {
     Result<String> updateUser(User user);
     Result<User> getUserByApiToken(User user);
     Result<User> getApiTokenByUsername(User user);
-    Result<User> getUserByPassword(UserLoginVo user);
+    Result<UserLoginVo> getUserByPassword(UserLoginVo user);
     Result<UserInfoVo> getUserInfoByUsername(String username);
 }
