@@ -51,11 +51,11 @@ public class AuthInterceptor implements HandlerInterceptor {
                 try {
                     authToken = authToken.split(" ")[1];
                     DecodedJWT decodedJwt = JwtUtils.getVerifier(authToken);
-                    String username = decodedJwt.getClaim("username").asString();
-                    if (stringRedisTemplate.opsForValue().get(RedisKeyConstant.USER_KEY + username + RedisKeyConstant.USER_INFO) == null) {
+                    int uid = decodedJwt.getClaim("uid").asInt();
+                    if (stringRedisTemplate.opsForValue().get(RedisKeyConstant.USER_KEY + uid + RedisKeyConstant.USER_INFO) == null) {
                         return authFailed(response);
                     }
-                    request.getSession().setAttribute("username", username);
+                    request.getSession().setAttribute("uid", uid);
                 } catch (Exception e) {
                     return authFailed(response);
                 }

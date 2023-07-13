@@ -104,31 +104,23 @@ public class CourseServiceImpl implements CourseService {
 //    Api用
     @Override
     public Result<List<CourseVo>> listCourseByCondition(CourseSearchVo courseSearchVo) {
-        int currWeek = WeekUtils.getCurrWeek(courseSearchVo.getTermStartDate());
-        var courseSearchBo = new CourseSearchBo(courseSearchVo.getUid(), courseSearchVo.getName(), courseSearchVo.getPlace(), courseSearchVo.getIsEffective() ? currWeek : null, courseSearchVo.getDayOfWeek(), courseSearchVo.getCredit(), courseSearchVo.getOddWeek());
-        return listCourse(courseSearchBo);
-    }
-
-    @Override
-    public Result<List<CourseVo>> listCourseByCondition(String username, CourseSearchVo courseSearchVo) {
-        String key = USER_KEY + username;
-        Integer uid = getUid(username);
+        String key = USER_KEY + courseSearchVo.getUid();
         UserInfoVo userInfo;
         try {
             userInfo = objectMapper.readValue(stringRedisTemplate.opsForValue().get(key + USER_INFO), UserInfoVo.class);
         } catch (JsonProcessingException e) {
-            log.warn("用户 {} CacheInfo 序列化失败：{}", username, e.getMessage());
+            log.warn("用户Uid: {} CacheInfo 序列化失败: {}", courseSearchVo.getUid(), e.getMessage());
             return null;
         }
         Integer currWeek;
-        String currWeekJson;
-        if ((currWeekJson = stringRedisTemplate.opsForValue().get(key + USER_CURR_WEEK)) != null) {
-            currWeek = Integer.parseInt(currWeekJson);
+        String currWeekStr;
+        if ((currWeekStr = stringRedisTemplate.opsForValue().get(key + USER_CURR_WEEK)) != null) {
+            currWeek = Integer.parseInt(currWeekStr);
         } else {
             currWeek = WeekUtils.getCurrWeek(userInfo.getTermStartDate());
             stringRedisTemplate.opsForValue().set(key + USER_CURR_WEEK, String.valueOf(currWeek), 30, TimeUnit.MINUTES);
         }
-        var courseSearchBo = new CourseSearchBo(uid, courseSearchVo.getName(), courseSearchVo.getPlace(), courseSearchVo.getIsEffective() ? currWeek : null, courseSearchVo.getDayOfWeek(), courseSearchVo.getCredit(), courseSearchVo.getOddWeek());
+        var courseSearchBo = new CourseSearchBo(courseSearchVo.getUid(), courseSearchVo.getName(), courseSearchVo.getPlace(), courseSearchVo.getIsEffective() ? currWeek : null, courseSearchVo.getDayOfWeek(), courseSearchVo.getCredit(), courseSearchVo.getOddWeek());
         return listCourse(courseSearchBo);
     }
 
@@ -172,9 +164,5 @@ public class CourseServiceImpl implements CourseService {
             }
         }
         return Result.success(COURSE_LIST_SUCCESS, courseVoList);
-    }
-
-    private Integer getUid(String username) {
-        return Integer.parseInt(stringRedisTemplate.opsForValue().get(USER_KEY + username + USER_UID));
     }
 }

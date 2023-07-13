@@ -55,26 +55,26 @@ public class UserController {
     @TokenRequired
     @GetMapping ("/logout")
     public Result<String> logout(HttpServletRequest request) {
-        var username = (String) request.getSession().getAttribute("username");
-        stringRedisTemplate.delete(USER_KEY + username + USER_UID);
-        stringRedisTemplate.delete(USER_KEY + username + USER_INFO);
-        stringRedisTemplate.delete(USER_KEY + username + USER_CURR_WEEK);
-        request.getSession().removeAttribute("username");
+        var uid = (Integer) request.getSession().getAttribute("uid");
+        stringRedisTemplate.delete(USER_KEY + uid + USER_USERNAME);
+        stringRedisTemplate.delete(USER_KEY + uid + USER_INFO);
+        stringRedisTemplate.delete(USER_KEY + uid + USER_CURR_WEEK);
+        request.getSession().removeAttribute("uid");
         return Result.success(USER_LOGOUT_SUCCESS, null);
     }
 
     @TokenRequired
     @GetMapping("/info")
     public Result<UserInfoVo> getUserInfo(HttpServletRequest request) {
-        var username = (String) request.getSession().getAttribute("username");
-        return userService.getUserInfoByUsername(username);
+        var uid = (Integer) request.getSession().getAttribute("uid");
+        return userService.getUserInfoByUsername(uid);
     }
 
     @TokenRequired
     @PostMapping("/modify")
     public Result<String> modifyUser(HttpServletRequest request, @RequestBody User user) {
-        var username = (String) request.getSession().getAttribute("username");
-        user.setUsername(username);
+        var uid = (Integer) request.getSession().getAttribute("uid");
+        user.setUid(uid);
         return userService.updateUser(user);
     }
 }

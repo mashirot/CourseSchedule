@@ -37,8 +37,7 @@ public class CourseController {
     @TokenRequired
     @PostMapping("/ins")
     public Result<String> saveCourse(HttpServletRequest request, @RequestBody Course course) {
-        var username = (String) request.getSession().getAttribute("username");
-        Integer uid = getUid(username);
+        var uid = (Integer) request.getSession().getAttribute("uid");
         course.setUid(uid);
         Result<String> result = courseService.saveCourse(course);
         if (result.code() == StatusCodeConstants.COURSE_INSERT_SUCCESS) {
@@ -50,8 +49,7 @@ public class CourseController {
     @TokenRequired
     @PostMapping("/file")
     public Result<String> uploadFile(@RequestBody MultipartFile courseFile, HttpServletRequest request) {
-        var username = (String) request.getSession().getAttribute("username");
-        Integer uid = getUid(username);
+        var uid = (Integer) request.getSession().getAttribute("uid");
         Result<String> result = courseService.saveCourseInFile(courseFile, uid);
         if (result.code() == StatusCodeConstants.COURSE_INSERT_SUCCESS) {
             stringRedisTemplate.delete(COURSE_KEY + uid + COURSE_ALL);
@@ -62,8 +60,7 @@ public class CourseController {
     @TokenRequired
     @PostMapping("/del")
     public Result<String> delCourse(HttpServletRequest request, @RequestBody CourseSearchVo courseSearchVo) {
-        var username = (String) request.getSession().getAttribute("username");
-        Integer uid = getUid(username);
+        var uid = (Integer) request.getSession().getAttribute("uid");
         courseSearchVo.setUid(uid);
         Result<String> result = courseService.delCourse(courseSearchVo);
         if (result.code() == StatusCodeConstants.COURSE_DELETE_SUCCESS) {
@@ -75,8 +72,7 @@ public class CourseController {
     @TokenRequired
     @PostMapping("/update")
     public Result<String> updateCourse(HttpServletRequest request, @RequestBody Course course) {
-        var username = (String) request.getSession().getAttribute("username");
-        Integer uid = getUid(username);
+        var uid = (Integer) request.getSession().getAttribute("uid");
         course.setUid(uid);
         Result<String> result = courseService.updateCourse(course);
         if (result.code() == StatusCodeConstants.COURSE_UPDATE_SUCCESS) {
@@ -88,11 +84,8 @@ public class CourseController {
     @TokenRequired
     @PostMapping("/sel")
     public Result<List<CourseVo>> listCourseByCondition(HttpServletRequest request, @RequestBody CourseSearchVo courseSearchVo) {
-        var username = (String) request.getSession().getAttribute("username");
-        return courseService.listCourseByCondition(username, courseSearchVo);
-    }
-
-    private Integer getUid(String username) {
-        return Integer.parseInt(stringRedisTemplate.opsForValue().get(USER_KEY + username + USER_UID));
+        var uid = (Integer) request.getSession().getAttribute("uid");
+        courseSearchVo.setUid(uid);
+        return courseService.listCourseByCondition(courseSearchVo);
     }
 }

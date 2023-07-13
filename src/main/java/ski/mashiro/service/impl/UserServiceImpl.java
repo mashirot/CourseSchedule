@@ -56,10 +56,10 @@ public class UserServiceImpl implements UserService {
         var currUser = userDao.getUserByUsername(user.getUsername());
         boolean checkPw = BCrypt.checkpw(user.getPassword(), currUser.getPassword());
         if (checkPw) {
-            String authToken = JwtUtils.createToken(user.getUsername());
-            String key = USER_KEY + currUser.getUsername();
+            String authToken = JwtUtils.createToken(currUser.getUid());
+            String key = USER_KEY + currUser.getUid();
             try {
-                stringRedisTemplate.opsForValue().set(key + USER_UID, currUser.getUid().toString(), 24, TimeUnit.HOURS);
+                stringRedisTemplate.opsForValue().set(key + USER_USERNAME, currUser.getUsername(), 24, TimeUnit.HOURS);
                 UserInfoVo userInfoVo = new UserInfoVo(currUser.getUsername(), currUser.getTermStartDate(), currUser.getTermEndDate(), null, currUser.getApiToken());
                 stringRedisTemplate.opsForValue().set(key + USER_INFO, objectMapper.writeValueAsString(userInfoVo), 24, TimeUnit.HOURS);
                 return Result.success(USER_LOGIN_SUCCESS, new UserLoginVo(authToken));
@@ -72,8 +72,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<UserInfoVo> getUserInfoByUsername(String username) {
-        String key = USER_KEY + username;
+    public Result<UserInfoVo> getUserInfoByUsername(int uid) {
+        String key = USER_KEY + uid;
         try {
             String infoCache;
             if ((infoCache = stringRedisTemplate.opsForValue().get(key + USER_INFO)) != null) {
@@ -87,23 +87,12 @@ public class UserServiceImpl implements UserService {
                     stringRedisTemplate.opsForValue().set(key + USER_CURR_WEEK, String.valueOf(currWeek), 30, TimeUnit.MINUTES);
                 }
                 userInfo.setCurrWeek(currWeek);
-                return new Result<>(USER_INFO_SUCCESS, userInfo, null);
+                return Result.success(USER_INFO_SUCCESS, userInfo);
             }
         } catch (JsonProcessingException e) {
-            log.warn("用户 {} CacheInfo 序列化失败：{}", username, e.getMessage());
+            log.warn("用户 {} CacheInfo 序列化失败：{}", uid, e.getMessage());
         }
-        var user = userDao.getUserByUsername(username);
-        int currWeek = WeekUtils.getCurrWeek(user.getTermStartDate());
-        try {
-            stringRedisTemplate.opsForValue().set(key + USER_UID, user.getUid().toString(), 24, TimeUnit.HOURS);
-            UserInfoVo userInfoVo = new UserInfoVo(user.getUsername(), user.getTermStartDate(), user.getTermEndDate(), null, user.getApiToken());
-            stringRedisTemplate.opsForValue().set(key + USER_INFO, objectMapper.writeValueAsString(userInfoVo), 24, TimeUnit.HOURS);
-            stringRedisTemplate.opsForValue().set(key + USER_CURR_WEEK, String.valueOf(currWeek), 30, TimeUnit.MINUTES);
-        } catch (JsonProcessingException e) {
-            log.warn(e.getMessage());
-            return Result.failed(SYSTEM_ERR, null);
-        }
-        return Result.success(USER_INFO_SUCCESS, new UserInfoVo(user.getUsername(), user.getTermStartDate(), user.getTermEndDate(), currWeek, user.getApiToken()));
+        return Result.failed(USER_INFO_FAILED, null);
     }
 
     @Override
@@ -116,22 +105,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<User> getApiTokenByUsername(User user) {
-        String token = userDao.getApiTokenByUsername(user.getUsername());
-        if (token == null) {
-            return Result.failed(USER_GET_API_FAILED, null);
-        }
-        user.setApiToken(token);
-        return Result.success(USER_GET_API_SUCCESS, user);
-    }
-
-    @Override
     public Result<String> updateUser(User user) {
         if (user.getPassword() != null) {
             user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
         }
         if (userDao.updateUser(user) > 0) {
-            stringRedisTemplate.delete(USER_KEY + user.getUsername() + USER_INFO);
+            String key = USER_KEY + user.getUid();
+            String username = stringRedisTemplate.opsForValue().get(key + USER_USERNAME);
+            var newUser = userDao.getUserByUsername(username);
+            try {
+                stringRedisTemplate.opsForValue().set(key + USER_USERNAME, newUser.getUsername(), 24, TimeUnit.HOURS);
+                UserInfoVo userInfoVo = new UserInfoVo(newUser.getUsername(), newUser.getTermStartDate(), newUser.getTermEndDate(), null, newUser.getApiToken());
+                stringRedisTemplate.opsForValue().set(key + USER_INFO, objectMapper.writeValueAsString(userInfoVo), 24, TimeUnit.HOURS);
+            } catch (Exception e) {
+                log.warn(e.getMessage());
+            }
             return Result.success(USER_MODIFY_SUCCESS, null);
         }
         return Result.failed(USER_MODIFY_FAILED, null);

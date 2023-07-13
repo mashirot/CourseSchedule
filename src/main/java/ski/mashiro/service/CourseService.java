@@ -18,6 +18,5 @@ public interface CourseService {
     Result<String> delCourse(CourseSearchVo courseSearchVo);
     Result<String> updateCourse(Course course);
     Result<List<CourseVo>> listCourseByCondition(CourseSearchVo courseSearchVo);
-    Result<List<CourseVo>> listCourseByCondition(String username, CourseSearchVo courseSearchVo);
     Result<List<CourseVo>> listCourse(CourseSearchBo courseSearchBo);
 }

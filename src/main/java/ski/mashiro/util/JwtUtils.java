@@ -15,9 +15,9 @@ public class JwtUtils {
     private static final String ALGORITHM_SALT = "MashiroT";
     private static final int EXPIRATION = 24 * 60 * 60 * 1000;
 
-    public static String createToken(String username) {
+    public static String createToken(int uid) {
         return JWT.create()
-                .withClaim("username", username)
+                .withClaim("uid", uid)
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION))
                 .withIssuer("mashirot")
                 .withIssuedAt(new Date())

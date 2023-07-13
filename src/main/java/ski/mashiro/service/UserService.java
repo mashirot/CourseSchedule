@@ -13,7 +13,6 @@ public interface UserService {
     Result<String> saveUser(UserRegVo user);
     Result<String> updateUser(User user);
     Result<User> getUserByApiToken(User user);
-    Result<User> getApiTokenByUsername(User user);
     Result<UserLoginVo> getUserByPassword(UserLoginVo user);
-    Result<UserInfoVo> getUserInfoByUsername(String username);
+    Result<UserInfoVo> getUserInfoByUsername(int uid);
 }
