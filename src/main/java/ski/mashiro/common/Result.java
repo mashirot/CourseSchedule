@@ -1,4 +1,4 @@
-package ski.mashiro.dto;
+package ski.mashiro.common;
 
 public record Result<T>(
         int code,

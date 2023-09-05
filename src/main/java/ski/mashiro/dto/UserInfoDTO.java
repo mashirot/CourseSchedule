@@ -1,4 +1,4 @@
-package ski.mashiro.vo;
+package ski.mashiro.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInfoVo {
+public class UserInfoDTO {
     private String username;
     private Date termStartDate;
     private Date termEndDate;

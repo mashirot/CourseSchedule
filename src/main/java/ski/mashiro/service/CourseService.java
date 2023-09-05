@@ -2,10 +2,10 @@ package ski.mashiro.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import ski.mashiro.bo.CourseSearchBo;
-import ski.mashiro.vo.CourseVo;
-import ski.mashiro.vo.CourseSearchVo;
-import ski.mashiro.pojo.Course;
-import ski.mashiro.dto.Result;
+import ski.mashiro.dto.CourseDTO;
+import ski.mashiro.dto.CourseSearchDTO;
+import ski.mashiro.entity.Course;
+import ski.mashiro.common.Result;
 
 import java.util.List;
 
@@ -15,8 +15,9 @@ import java.util.List;
 public interface CourseService {
     Result<String> saveCourse(Course course);
     Result<String> saveCourseInFile(MultipartFile courseFile, int uid);
-    Result<String> delCourse(CourseSearchVo courseSearchVo);
+    Result<String> delCourse(CourseSearchDTO courseSearchDTO);
     Result<String> updateCourse(Course course);
-    Result<List<CourseVo>> listCourseByCondition(CourseSearchVo courseSearchVo);
-    Result<List<CourseVo>> listCourse(CourseSearchBo courseSearchBo);
+    Result<List<CourseDTO>> listCourseByCondition(CourseSearchDTO courseSearchDTO);
+    Result<List<CourseDTO>> listCourseByCondition4Api(CourseSearchDTO courseSearchDTO);
+    Result<List<CourseDTO>> listCourse(CourseSearchBo courseSearchBo);
 }

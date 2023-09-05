@@ -17,12 +17,12 @@
         </set>
         where username = #{user.username};
     </update>
-    <select id="getUserByUsername" resultType="ski.mashiro.pojo.User">
+    <select id="getUserByUsername" resultType="ski.mashiro.entity.User">
         select uid, username, password, term_start_date, term_end_date, api_token
         from user
         where username = #{username};
     </select>
-    <select id="getUserByApiToken" resultType="ski.mashiro.pojo.User">
+    <select id="getUserByApiToken" resultType="ski.mashiro.entity.User">
         select uid, username, term_start_date, term_end_date
         from user
         where username = #{username} and api_token = #{apiToken};

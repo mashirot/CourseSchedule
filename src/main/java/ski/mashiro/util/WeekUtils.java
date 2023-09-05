@@ -17,6 +17,9 @@ public class WeekUtils {
         LocalDateTime now = LocalDateTime.now();
         int betweenWeek = Weeks.between(startDate, now).getAmount();
         int betweenDay = Days.between(startDate, now).getAmount();
-        return betweenDay % 7 == 0 ? betweenWeek : betweenWeek + 1;
+        if (betweenDay % 7 == 0 || betweenDay >= 0) {
+            return betweenWeek + 1;
+        }
+        return betweenWeek;
     }
 }

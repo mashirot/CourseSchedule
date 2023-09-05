@@ -1,4 +1,4 @@
-package ski.mashiro.pojo;
+package ski.mashiro.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

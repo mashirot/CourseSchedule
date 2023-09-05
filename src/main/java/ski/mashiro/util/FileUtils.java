@@ -1,6 +1,6 @@
 package ski.mashiro.util;
 
-import ski.mashiro.pojo.Course;
+import ski.mashiro.entity.Course;
 
 import java.io.BufferedReader;
 import java.io.IOException;

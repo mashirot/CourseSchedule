@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ski.mashiro.annotation.TokenRequired;
 import ski.mashiro.constant.StatusCodeConstants;
-import ski.mashiro.dto.Result;
-import ski.mashiro.pojo.Course;
+import ski.mashiro.common.Result;
+import ski.mashiro.entity.Course;
 import ski.mashiro.service.CourseService;
-import ski.mashiro.vo.CourseSearchVo;
-import ski.mashiro.vo.CourseVo;
+import ski.mashiro.dto.CourseSearchDTO;
+import ski.mashiro.dto.CourseDTO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -59,10 +59,10 @@ public class CourseController {
 
     @TokenRequired
     @PostMapping("/del")
-    public Result<String> delCourse(HttpServletRequest request, @RequestBody CourseSearchVo courseSearchVo) {
+    public Result<String> delCourse(HttpServletRequest request, @RequestBody CourseSearchDTO courseSearchDTO) {
         var uid = (Integer) request.getSession().getAttribute("uid");
-        courseSearchVo.setUid(uid);
-        Result<String> result = courseService.delCourse(courseSearchVo);
+        courseSearchDTO.setUid(uid);
+        Result<String> result = courseService.delCourse(courseSearchDTO);
         if (result.code() == StatusCodeConstants.COURSE_DELETE_SUCCESS) {
             stringRedisTemplate.delete(COURSE_KEY + uid + COURSE_ALL);
         }
@@ -83,9 +83,9 @@ public class CourseController {
 
     @TokenRequired
     @PostMapping("/sel")
-    public Result<List<CourseVo>> listCourseByCondition(HttpServletRequest request, @RequestBody CourseSearchVo courseSearchVo) {
+    public Result<List<CourseDTO>> listCourseByCondition(HttpServletRequest request, @RequestBody CourseSearchDTO courseSearchDTO) {
         var uid = (Integer) request.getSession().getAttribute("uid");
-        courseSearchVo.setUid(uid);
-        return courseService.listCourseByCondition(courseSearchVo);
+        courseSearchDTO.setUid(uid);
+        return courseService.listCourseByCondition(courseSearchDTO);
     }
 }

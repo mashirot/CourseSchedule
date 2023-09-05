@@ -8,14 +8,14 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import ski.mashiro.dao.UserDao;
-import ski.mashiro.dto.Result;
-import ski.mashiro.pojo.User;
+import ski.mashiro.common.Result;
+import ski.mashiro.entity.User;
 import ski.mashiro.service.UserService;
 import ski.mashiro.util.JwtUtils;
 import ski.mashiro.util.WeekUtils;
-import ski.mashiro.vo.UserInfoVo;
-import ski.mashiro.vo.UserLoginVo;
-import ski.mashiro.vo.UserRegVo;
+import ski.mashiro.dto.UserInfoDTO;
+import ski.mashiro.dto.UserLoginDTO;
+import ski.mashiro.dto.UserRegDTO;
 
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<String> saveUser(UserRegVo userReg) {
+    public Result<String> saveUser(UserRegDTO userReg) {
         var user = new User(userReg.getUsername(), userReg.getPassword(), userReg.getTermStartDate(), userReg.getTermEndDate());
         user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
         user.setApiToken(DigestUtils.md5DigestAsHex(BCrypt.hashpw(user.getUsername() + user.getTermStartDate() + user.getTermEndDate(), BCrypt.gensalt()).getBytes()));
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<UserLoginVo> getUserByPassword(UserLoginVo userLogin) {
+    public Result<UserLoginDTO> getUserByPassword(UserLoginDTO userLogin) {
         var user = new User(userLogin.getUsername(), userLogin.getPassword());
         var currUser = userDao.getUserByUsername(user.getUsername());
         boolean checkPw = BCrypt.checkpw(user.getPassword(), currUser.getPassword());
@@ -60,9 +60,9 @@ public class UserServiceImpl implements UserService {
             String key = USER_KEY + currUser.getUid();
             try {
                 stringRedisTemplate.opsForValue().set(key + USER_USERNAME, currUser.getUsername(), 24, TimeUnit.HOURS);
-                UserInfoVo userInfoVo = new UserInfoVo(currUser.getUsername(), currUser.getTermStartDate(), currUser.getTermEndDate(), null, currUser.getApiToken());
-                stringRedisTemplate.opsForValue().set(key + USER_INFO, objectMapper.writeValueAsString(userInfoVo), 24, TimeUnit.HOURS);
-                return Result.success(USER_LOGIN_SUCCESS, new UserLoginVo(authToken));
+                UserInfoDTO userInfoDTO = new UserInfoDTO(currUser.getUsername(), currUser.getTermStartDate(), currUser.getTermEndDate(), null, currUser.getApiToken());
+                stringRedisTemplate.opsForValue().set(key + USER_INFO, objectMapper.writeValueAsString(userInfoDTO), 24, TimeUnit.HOURS);
+                return Result.success(USER_LOGIN_SUCCESS, new UserLoginDTO(authToken));
             } catch (Exception e) {
                 log.warn(e.getMessage());
                 return Result.failed(SYSTEM_ERR, null);
@@ -72,12 +72,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<UserInfoVo> getUserInfoByUsername(int uid) {
+    public Result<UserInfoDTO> getUserInfoByUsername(int uid) {
         String key = USER_KEY + uid;
         try {
             String infoCache;
             if ((infoCache = stringRedisTemplate.opsForValue().get(key + USER_INFO)) != null) {
-                UserInfoVo userInfo = objectMapper.readValue(infoCache, UserInfoVo.class);
+                UserInfoDTO userInfo = objectMapper.readValue(infoCache, UserInfoDTO.class);
                 Integer currWeek;
                 String currWeekStr;
                 if ((currWeekStr = stringRedisTemplate.opsForValue().get(key + USER_CURR_WEEK)) != null) {
@@ -115,8 +115,8 @@ public class UserServiceImpl implements UserService {
             var newUser = userDao.getUserByUsername(username);
             try {
                 stringRedisTemplate.opsForValue().set(key + USER_USERNAME, newUser.getUsername(), 24, TimeUnit.HOURS);
-                UserInfoVo userInfoVo = new UserInfoVo(newUser.getUsername(), newUser.getTermStartDate(), newUser.getTermEndDate(), null, newUser.getApiToken());
-                stringRedisTemplate.opsForValue().set(key + USER_INFO, objectMapper.writeValueAsString(userInfoVo), 24, TimeUnit.HOURS);
+                UserInfoDTO userInfoDTO = new UserInfoDTO(newUser.getUsername(), newUser.getTermStartDate(), newUser.getTermEndDate(), null, newUser.getApiToken());
+                stringRedisTemplate.opsForValue().set(key + USER_INFO, objectMapper.writeValueAsString(userInfoDTO), 24, TimeUnit.HOURS);
             } catch (Exception e) {
                 log.warn(e.getMessage());
             }

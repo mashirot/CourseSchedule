@@ -3,12 +3,12 @@ package ski.mashiro.controller;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import ski.mashiro.annotation.TokenRequired;
-import ski.mashiro.dto.Result;
-import ski.mashiro.pojo.User;
+import ski.mashiro.common.Result;
+import ski.mashiro.entity.User;
 import ski.mashiro.service.UserService;
-import ski.mashiro.vo.UserInfoVo;
-import ski.mashiro.vo.UserLoginVo;
-import ski.mashiro.vo.UserRegVo;
+import ski.mashiro.dto.UserInfoDTO;
+import ski.mashiro.dto.UserLoginDTO;
+import ski.mashiro.dto.UserRegDTO;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Result<String> register(HttpServletRequest request, @RequestBody UserRegVo userReg) {
+    public Result<String> register(HttpServletRequest request, @RequestBody UserRegDTO userReg) {
         String captcha = (String) request.getSession().getAttribute("captcha");
         try {
             if (!captcha.equalsIgnoreCase(userReg.getCaptchaCode())) {
@@ -43,12 +43,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Result<UserLoginVo> login(@RequestBody UserLoginVo userLogin) {
-        Result<UserLoginVo> rs = userService.getUserByPassword(userLogin);
+    public Result<UserLoginDTO> login(@RequestBody UserLoginDTO userLogin) {
+        Result<UserLoginDTO> rs = userService.getUserByPassword(userLogin);
         if (rs.code() != USER_LOGIN_SUCCESS) {
             return Result.failed(rs.code(), rs.msg());
         }
-        UserLoginVo user = rs.data();
+        UserLoginDTO user = rs.data();
         return Result.success(USER_LOGIN_SUCCESS, user);
     }
 
@@ -65,7 +65,7 @@ public class UserController {
 
     @TokenRequired
     @GetMapping("/info")
-    public Result<UserInfoVo> getUserInfo(HttpServletRequest request) {
+    public Result<UserInfoDTO> getUserInfo(HttpServletRequest request) {
         var uid = (Integer) request.getSession().getAttribute("uid");
         return userService.getUserInfoByUsername(uid);
     }

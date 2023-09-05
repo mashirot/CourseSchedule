@@ -4,10 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.threeten.extra.Days;
-import org.threeten.extra.Weeks;
+import ski.mashiro.util.WeekUtils;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Map;
 
 @SpringBootTest
@@ -15,11 +16,11 @@ class ScheduleApplicationTests {
 
     @Test
     void testCurrWeek() {
-        LocalDateTime date = LocalDateTime.of(2023, 2, 13, 0, 0, 0);
-        LocalDateTime now = LocalDateTime.now();
-        int betweenWeek = Weeks.between(date, now).getAmount();
-        int betweenDay = Days.between(date, now).getAmount();
-        System.out.println(betweenDay % 7 == 0 ? betweenWeek : betweenWeek + 1);
+        LocalDateTime date = LocalDateTime.of(2023, 9, 11, 0, 0, 0);
+        System.out.println(date);
+        Date from = Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
+        System.out.println(from);
+        System.out.println(WeekUtils.getCurrWeek(from));
     }
 
     @Test

@@ -1,4 +1,4 @@
-package ski.mashiro.vo;
+package ski.mashiro.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.Date;
  */
 @Data
 @NoArgsConstructor
-public class CourseSearchVo {
+public class CourseSearchDTO {
     private Integer uid;
     private Integer courseId;
     private String name;
@@ -20,15 +20,11 @@ public class CourseSearchVo {
     private Boolean isEffective;
     private Double credit;
     private Integer oddWeek;
-
     private Date termStartDate;
 
-    public CourseSearchVo(Integer uid) {
+    public CourseSearchDTO(Integer uid, String dayOfWeek, Boolean isEffective) {
         this.uid = uid;
-    }
-
-    public CourseSearchVo(Integer uid, Date termStartDate) {
-        this.uid = uid;
-        this.termStartDate = termStartDate;
+        this.dayOfWeek = dayOfWeek;
+        this.isEffective = isEffective;
     }
 }

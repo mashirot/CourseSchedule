@@ -33,7 +33,7 @@
         </if>
         ;
     </delete>
-    <select id="listCourseByCondition" resultType="ski.mashiro.pojo.Course">
+    <select id="listCourseByCondition" resultType="ski.mashiro.entity.Course">
         select course_id, day_of_week, start_time, end_time, name, place, teacher, start_week, end_week, odd_week, credit
         from course
         where 1 = 1

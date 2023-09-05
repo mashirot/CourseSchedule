@@ -2,7 +2,7 @@ package ski.mashiro.dao;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import ski.mashiro.pojo.User;
+import ski.mashiro.entity.User;
 
 /**
  * @author MashiroT

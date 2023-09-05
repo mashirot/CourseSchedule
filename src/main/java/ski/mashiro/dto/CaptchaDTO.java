@@ -1,4 +1,4 @@
-package ski.mashiro.vo;
+package ski.mashiro.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +8,6 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class CaptchaVo {
+public class CaptchaDTO {
     private String url;
 }

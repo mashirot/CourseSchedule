@@ -1,16 +1,13 @@
 package ski.mashiro.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ski.mashiro.vo.CourseVo;
-import ski.mashiro.vo.CourseSearchVo;
-import ski.mashiro.pojo.User;
-import ski.mashiro.service.CourseService;
-import ski.mashiro.service.UserService;
-import ski.mashiro.dto.Result;
+import ski.mashiro.dto.ApiCourseSearchDTO;
+import ski.mashiro.dto.CourseDTO;
+import ski.mashiro.service.ApiService;
+import ski.mashiro.common.Result;
 
 import java.util.List;
 
@@ -20,23 +17,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class ApiController {
+    private final ApiService apiService;
 
-    private final CourseService courseService;
-    private final UserService userService;
-
-    @Autowired
-    public ApiController(CourseService courseService, UserService userService) {
-        this.courseService = courseService;
-        this.userService = userService;
+    public ApiController(ApiService apiService) {
+        this.apiService = apiService;
     }
 
     @PostMapping("/sel")
-    public Result<List<CourseVo>> listCourseByCondition(@RequestBody CourseSearchVo courseSearchVo) {
-        return courseService.listCourseByCondition(courseSearchVo);
-    }
-
-    @PostMapping("/login")
-    public Result<User> loginByApiToken(@RequestBody User user) {
-        return userService.getUserByApiToken(user);
+    public Result<List<CourseDTO>> listCourseByCondition(@RequestBody ApiCourseSearchDTO apiCourseSearchDTO) {
+        return apiService.verifyAndSel(apiCourseSearchDTO);
     }
 }

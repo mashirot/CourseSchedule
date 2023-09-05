@@ -1,4 +1,4 @@
-package ski.mashiro.vo;
+package ski.mashiro.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class UserLoginVo {
+public class UserLoginDTO {
     private String username;
     private String password;
     private String apiToken;
     private String authToken;
 
-    public UserLoginVo(String authToken) {
+    public UserLoginDTO(String authToken) {
         this.authToken = authToken;
     }
 }
