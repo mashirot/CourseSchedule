@@ -16,7 +16,7 @@ class ScheduleApplicationTests {
 
     @Test
     void testCurrWeek() {
-        LocalDateTime date = LocalDateTime.of(2023, 9, 11, 0, 0, 0);
+        LocalDateTime date = LocalDateTime.of(2023, 9, 10, 19, 16, 0);
         System.out.println(date);
         Date from = Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
         System.out.println(from);
