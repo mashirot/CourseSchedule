@@ -16,10 +16,10 @@ public class WeekUtils {
     public static int getCurrWeek(Date termStartDate) {
         LocalDateTime startDate = LocalDateTime.ofInstant(termStartDate.toInstant(), ZoneId.systemDefault());
         LocalDateTime now = LocalDateTime.now();
-        int betweenWeek = Weeks.between(now, startDate).getAmount();
-        int betweenDay = Days.between(now, startDate).getAmount();
-        int betweenSecond = Seconds.between(now, startDate).getAmount();
-        if (betweenDay % 7 == 0 || betweenDay <= 0) {
+        int betweenWeek = Weeks.between(startDate, now).getAmount();
+        int betweenDay = Days.between(startDate, now).getAmount();
+        int betweenSecond = Seconds.between(startDate, now).getAmount();
+        if (betweenDay % 7 == 0 || betweenDay >= 0) {
             if (betweenDay == 0 && betweenSecond > 0) {
                 return betweenWeek;
             }
